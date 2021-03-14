@@ -137,19 +137,23 @@ if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*limiting connections by z
 # Source: https://github.com/sillsdev/ops-ansible-common-roles/blob/master/csf_config/files/regex.custom.pm
 # postfix/smtpd UNKNOWN from unknown
 if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/smtpd[^U]*UNKNOWN from unknown\[(\d+\.\d+\.\d+\.\d+)\]/)) {
-    return ("UNKNOWN from unknown from",$1,"postfix_unknown","2","25,587","3600");
+    return ("UNKNOWN from unknown from",$1,"postfix_unknown","5","25,587","3600");
 }
 
 # postfix/smtpd lost connection after AUTH
 if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/smtpd\[\d+\]: lost connection after AUTH from [^\[]+\[(\d+\.\d+\.\d+\.\d+)\]/)) {
-    return ("lost connection after AUTH from",$1,"postfix_lost","4","25,587","3600");
+    return ("lost connection after AUTH from",$1,"postfix_lost","5","25,587","3600");
+}
+
+# postfix/smtpd disconnect from unknown
+if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/smtpd[^U]*disconnect from unknown\[(\d+\.\d+\.\d+\.\d+)\]/)) {
+    return ("lost connection after AUTH from",$1,"postfix_disconnect","5","25,587","3600");
 }
 
 #Postfix SMTP AUTH
 # Source: https://github.com/rlunar/Ajenti/blob/20a9d53a0110dc8cc90eccd9c1e9706d0b050c75/csf/regex.pm#L310-L314
-if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ postfix\/smtpd(?:\[\d+\])?: warning: \S+\[(\S+)\]: SASL (?:LOGIN|PLAIN|(?:CRAM|DIGEST)-MD5) authentication failed/)) {
-	$ip = $2; $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("Failed SMTP AUTH login from","$ip","smtpauth")} else {return}
+if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ postfix\/smtpd(?:\[\d+\])?: warning: \S+\[(\S+)\]: SASL (?:LOGIN|PLAIN|(?:CRAM|DIGEST)-MD5) authentication failed/)) {
+    return ("Failed SMTP AUTH login from",$2,"postfix_smtpauth","5","25,587","3600");
 }
 
 # # postfix discard php header check
@@ -170,77 +174,75 @@ if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ 
 
 #BIND
 # Source: https://github.com/rlunar/Ajenti/blob/20a9d53a0110dc8cc90eccd9c1e9706d0b050c75/csf/regex.pm#L218-L222
-if (($config{LF_BIND}) and ($globlogs{BIND_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ named\[\d+\]: client (\S+)\#\d+(\s\(\S+\))?\:( view external\:)? (update|zone transfer|query \(cache\)) \'[^\']*\' denied$/)) {
-      $ip = $2; $acc = ""; $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("bind triggered by","$ip|$acc","bind")} else {return}
+#if (($config{LF_BIND}) and ($globlogs{BIND_LOG}{$lgfile}) and ($line =~
+if (($lgfile eq $config{BIND_LOG}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ named\[\d+\]: client (\S+)\#\d+(\s\(\S+\))?\:( view external\:)? (update|zone transfer|query \(cache\)) \'[^\']*\' denied$/)) {
+    return ("bind triggered by",$2,"bind","5","25,587","3600");
 }
 
 #webmin
-# Source: https://github.com/rlunar/Ajenti/blob/20a9d53a0110dc8cc90eccd9c1e9706d0b050c75/csf/regex.pm#L242-L246
-if (($config{LF_WEBMIN}) and ($globlogs{WEBMIN_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ webmin\[\d+\]: Invalid login as (\S+) from (\S+)/)) {
-      $ip = $3; $acc = $2; $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("Failed Webmin login from","$ip|$acc","webmin")} else {return}
+if (($lgfile eq $config{WEBMIN_LOG}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ webmin\[\d+\]: Invalid login as (\S+) from (\S+)/)) {
+    return ("Failed Webmin login from",$3,"webmin","3","10000","3600");
 }
 
-#proftpd
-# Source: https://github.com/rlunar/Ajenti/blob/20a9d53a0110dc8cc90eccd9c1e9706d0b050c75/csf/regex.pm#L137-L153
-if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? - no such user \'(\S*)\'/)) {
-      $ip = $2; $acc = $4; $ip =~ s/^::ffff://; $acc =~ s/:$//g;
-	if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
-}
-if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? USER (\S*) no such user found from/)) {
-      $ip = $2; $acc = $4; $ip =~ s/^::ffff://; $acc =~ s/:$//g;
-	if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
-}
-if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? - SECURITY VIOLATION/)) {
-      $ip = $2; $acc = ""; $ip =~ s/^::ffff://; $acc =~ s/:$//g;
-	if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
-}
-if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? - USER (\S*) \(Login failed\): Incorrect password/)) {
-      $ip = $2; $acc = $4; $ip =~ s/^::ffff://; $acc =~ s/:$//g;
-	if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
-}
-
-#openSSH
-# Source: https://github.com/rlunar/Ajenti/blob/20a9d53a0110dc8cc90eccd9c1e9706d0b050c75/csf/regex.pm#L24-L63
-if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: pam_unix\(sshd:auth\): authentication failure; logname=\S* uid=\S* euid=\S* tty=\S* ruser=\S* rhost=(\S+)\s+(user=(\S+))?/)) {
-	$ip = $3; $acc = $5; $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
-}
-if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Failed none for (\S*) from (\S+) port \S+/)) {
-      $ip = $4; $acc = $3; $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
-}
-if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Failed password for (invalid user |illegal user )?(\S*) from (\S+)( port \S+ \S+\s*)?/)) {
-      $ip = $5; $acc = $4; $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
-}
-if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Failed keyboard-interactive(\/pam)? for (invalid user )?(\S*) from (\S+) port \S+/)) {
-      $ip = $6; $acc = $4; $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
-}
-if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Invalid user (\S*) from (\S+)/)) {
-      $ip = $4; $acc = $3; $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
-}
-if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: User (\S*) from (\S+)\s* not allowed because not listed in AllowUsers/)) {
-      $ip = $4; $acc = $3; $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
-}
-if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Did not receive identification string from (\S+)/)) {
-      $ip = $3; $acc = ""; $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
-}
-if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: refused connect from (\S+)/)) {
-      $ip = $3; $acc = ""; $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
-}
-
-#Debian/Ubuntu
-if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Illegal user (\S*) from (\S+)/)) {
-      $ip = $4; $acc = $3; $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
-}
+# #proftpd
+# # Source: https://github.com/rlunar/Ajenti/blob/20a9d53a0110dc8cc90eccd9c1e9706d0b050c75/csf/regex.pm#L137-L153
+# if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? - no such user \'(\S*)\'/)) {
+#       $ip = $2; $acc = $4; $ip =~ s/^::ffff://; $acc =~ s/:$//g;
+# 	if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
+# }
+# if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? USER (\S*) no such user found from/)) {
+#       $ip = $2; $acc = $4; $ip =~ s/^::ffff://; $acc =~ s/:$//g;
+# 	if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
+# }
+# if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? - SECURITY VIOLATION/)) {
+#       $ip = $2; $acc = ""; $ip =~ s/^::ffff://; $acc =~ s/:$//g;
+# 	if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
+# }
+# if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? - USER (\S*) \(Login failed\): Incorrect password/)) {
+#       $ip = $2; $acc = $4; $ip =~ s/^::ffff://; $acc =~ s/:$//g;
+# 	if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
+# }
+# 
+# #openSSH
+# # Source: https://github.com/rlunar/Ajenti/blob/20a9d53a0110dc8cc90eccd9c1e9706d0b050c75/csf/regex.pm#L24-L63
+# if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: pam_unix\(sshd:auth\): authentication failure; logname=\S* uid=\S* euid=\S* tty=\S* ruser=\S* rhost=(\S+)\s+(user=(\S+))?/)) {
+# 	$ip = $3; $acc = $5; $ip =~ s/^::ffff://;
+# 	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
+# }
+# if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Failed none for (\S*) from (\S+) port \S+/)) {
+#       $ip = $4; $acc = $3; $ip =~ s/^::ffff://;
+# 	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
+# }
+# if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Failed password for (invalid user |illegal user )?(\S*) from (\S+)( port \S+ \S+\s*)?/)) {
+#       $ip = $5; $acc = $4; $ip =~ s/^::ffff://;
+# 	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
+# }
+# if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Failed keyboard-interactive(\/pam)? for (invalid user )?(\S*) from (\S+) port \S+/)) {
+#       $ip = $6; $acc = $4; $ip =~ s/^::ffff://;
+# 	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
+# }
+# if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Invalid user (\S*) from (\S+)/)) {
+#       $ip = $4; $acc = $3; $ip =~ s/^::ffff://;
+# 	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
+# }
+# if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: User (\S*) from (\S+)\s* not allowed because not listed in AllowUsers/)) {
+#       $ip = $4; $acc = $3; $ip =~ s/^::ffff://;
+# 	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
+# }
+# if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Did not receive identification string from (\S+)/)) {
+#       $ip = $3; $acc = ""; $ip =~ s/^::ffff://;
+# 	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
+# }
+# if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: refused connect from (\S+)/)) {
+#       $ip = $3; $acc = ""; $ip =~ s/^::ffff://;
+# 	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
+# }
+# 
+# #Debian/Ubuntu
+# if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Illegal user (\S*) from (\S+)/)) {
+#       $ip = $4; $acc = $3; $ip =~ s/^::ffff://;
+# 	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
+# }
 # If the matches in this file are not syntactically correct for perl then lfd
 # will fail with an error. You are responsible for the security of any regex
 # expressions you use. Remember that log file spoofing can exploit poorly
