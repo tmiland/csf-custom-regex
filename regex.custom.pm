@@ -147,10 +147,10 @@ if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/smtpd\[\d+\]: los
 
 #Postfix SMTP AUTH
 # Source: https://github.com/rlunar/Ajenti/blob/20a9d53a0110dc8cc90eccd9c1e9706d0b050c75/csf/regex.pm#L310-L314
-	if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ postfix\/smtpd(?:\[\d+\])?: warning: \S+\[(\S+)\]: SASL (?:LOGIN|PLAIN|(?:CRAM|DIGEST)-MD5) authentication failed/)) {
-		$ip = $2; $ip =~ s/^::ffff://;
-		if (checkip(\$ip)) {return ("Failed SMTP AUTH login from","$ip","smtpauth")} else {return}
-	}
+if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ postfix\/smtpd(?:\[\d+\])?: warning: \S+\[(\S+)\]: SASL (?:LOGIN|PLAIN|(?:CRAM|DIGEST)-MD5) authentication failed/)) {
+	$ip = $2; $ip =~ s/^::ffff://;
+	if (checkip(\$ip)) {return ("Failed SMTP AUTH login from","$ip","smtpauth")} else {return}
+}
 
 # # postfix discard php header check
 # if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/cleanup[^d]*discard: header X-PHP-Script: [^f]+for (\d+\.\d+\.\d+\.\d+)/)) {
@@ -168,15 +168,19 @@ if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/smtpd\[\d+\]: los
 #     return ("Client host rejected: hostname not found",$1,"smtphostname","4","","86400","0");
 # }
 
-# BIND - Denied queries
-# Source: https://potatoforinter.net/974/configuring-config-server-firewall-to-deal-with-bind9-attacks/
-if (($config{LF_BIND}) and ($globlogs{BIND_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ named\[\d+\]: client @\S+ (\S+)\#\d+(\s\(\S+\))?\: query ?(\(cache\))? \'\S+\' denied$/)) {
-                my $ip = $2;
-                my $acc = "";
-                $ip =~ s/^::ffff://;
-if (checkip(\$ip)) {return ("bind triggered by","$ip|$acc","bind")} else {return}
+#BIND
+# Source: https://github.com/rlunar/Ajenti/blob/20a9d53a0110dc8cc90eccd9c1e9706d0b050c75/csf/regex.pm#L218-L222
+if (($config{LF_BIND}) and ($globlogs{BIND_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ named\[\d+\]: client (\S+)\#\d+(\s\(\S+\))?\:( view external\:)? (update|zone transfer|query \(cache\)) \'[^\']*\' denied$/)) {
+      $ip = $2; $acc = ""; $ip =~ s/^::ffff://;
+	if (checkip(\$ip)) {return ("bind triggered by","$ip|$acc","bind")} else {return}
 }
 
+#webmin
+# Source: https://github.com/rlunar/Ajenti/blob/20a9d53a0110dc8cc90eccd9c1e9706d0b050c75/csf/regex.pm#L242-L246
+if (($config{LF_WEBMIN}) and ($globlogs{WEBMIN_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ webmin\[\d+\]: Invalid login as (\S+) from (\S+)/)) {
+      $ip = $3; $acc = $2; $ip =~ s/^::ffff://;
+	if (checkip(\$ip)) {return ("Failed Webmin login from","$ip|$acc","webmin")} else {return}
+}
 # If the matches in this file are not syntactically correct for perl then lfd
 # will fail with an error. You are responsible for the security of any regex
 # expressions you use. Remember that log file spoofing can exploit poorly
