@@ -187,10 +187,10 @@ sub processline {
 
 #openSSH
 #RH
-	if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: pam_unix\(sshd:auth\): authentication failure; logname=\S* uid=\S* euid=\S* tty=\S* ruser=\S* rhost=(\S+)\s+(user=(\S+))?/)) {
-		$ip = $3; $acc = $5; $ip =~ s/^::ffff://;
-		if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
-	}
+	# if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: pam_unix\(sshd:auth\): authentication failure; logname=\S* uid=\S* euid=\S* tty=\S* ruser=\S* rhost=(\S+)\s+(user=(\S+))?/)) {
+	# 	$ip = $3; $acc = $5; $ip =~ s/^::ffff://;
+	# 	if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
+	# }
 	if (($config{LF_SSHD}) and (($lgfile eq "/var/log/messages") or ($lgfile eq "/var/log/secure") or ($globlogs{SSHD_LOG}{$lgfile})) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) (\S+ )?sshd\[\d+\]: Failed none for (\S*) from (\S+) port \S+/)) {
         $ip = $4; $acc = $3; $ip =~ s/^::ffff://;
 		if (checkip(\$ip)) {return ("Failed SSH login from","$ip|$acc","sshd")} else {return}
@@ -277,11 +277,11 @@ sub processline {
 	}
 
 #cxs
-	if (($config{LF_CXS}) and ($globlogs{MODSEC_LOG}{$lgfile}) and ($line =~ /^\[\S+\s+\S+\s+\S+\s+\S+\s+\S+\] \[(\w*:)?error\] (\[pid \d+(:tid \d+)?\] )?\[client (\S+)\] (\w+: )?ModSecurity: Access denied with code \d\d\d \(phase 2\)\. File \"[^\"]*\" rejected by the approver script \"\/etc\/cxs\/cxscgi\.sh\"/)) {
-        $ip = $4; $acc = ""; $ip =~ s/^::ffff://;
-		if (split(/:/,$ip) == 2) {$ip =~ s/:\d+$//}
-		if (checkip(\$ip)) {return ("cxs mod_security triggered by","$ip|$acc","cxs")} else {return}
-	}
+	# if (($config{LF_CXS}) and ($globlogs{MODSEC_LOG}{$lgfile}) and ($line =~ /^\[\S+\s+\S+\s+\S+\s+\S+\s+\S+\] \[(\w*:)?error\] (\[pid \d+(:tid \d+)?\] )?\[client (\S+)\] (\w+: )?ModSecurity: Access denied with code \d\d\d \(phase 2\)\. File \"[^\"]*\" rejected by the approver script \"\/etc\/cxs\/cxscgi\.sh\"/)) {
+  #       $ip = $4; $acc = ""; $ip =~ s/^::ffff://;
+	# 	if (split(/:/,$ip) == 2) {$ip =~ s/:\d+$//}
+	# 	if (checkip(\$ip)) {return ("cxs mod_security triggered by","$ip|$acc","cxs")} else {return}
+	# }
 
 #mod_security v2 (nginx)
 	if (($config{LF_MODSEC}) and ($globlogs{MODSEC_LOG}{$lgfile}) and ($line =~ /^\S+ \S+ \[\S+\] \S+ \[client (\S+)\] ModSecurity:(( \[[^]]+\])*)? Access denied/)) {
