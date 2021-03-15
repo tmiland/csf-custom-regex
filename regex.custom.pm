@@ -150,12 +150,16 @@ if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/smtpd[^U]*disconn
     return ("lost connection after AUTH from",$1,"postfix_disconnect","5","25,587","3600");
 }
 
-#Postfix SMTP AUTH
+#Postfix SMTP SASL AUTH
 # Source: https://github.com/rlunar/Ajenti/blob/20a9d53a0110dc8cc90eccd9c1e9706d0b050c75/csf/regex.pm#L310-L314
 if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ postfix\/smtpd(?:\[\d+\])?: warning: \S+\[(\S+)\]: SASL (?:LOGIN|PLAIN|(?:CRAM|DIGEST)-MD5) authentication failed/)) {
-    return ("Failed SMTP AUTH login from",$2,"postfix_smtpauth","5","25,587","3600");
+    return ("Failed SASL login from",$2,"postfix_saslauth","5","25,587","3600");
 }
 
+#Postfix SMTP SUBMISSION SASL AUTH
+if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/submission\/smtpd\[\d+\]: warning: \S+\[(\S+)\]: SASL (?:LOGIN|PLAIN|(?:CRAM|DIGEST)-MD5) authentication failed/)) {
+  return ("Failed SASL login from",$1,"postfix_saslauth","10","25,465,587","1");
+}
 # # postfix discard php header check
 # if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/cleanup[^d]*discard: header X-PHP-Script: [^f]+for (\d+\.\d+\.\d+\.\d+)/)) {
 #     return ("discard via php header check from ",$1,"postfix_discard","2","25,587,80","3600");
