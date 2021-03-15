@@ -30,7 +30,6 @@ You will see lines like: ```Mar 15 00:05:46 vps lfd[688]: (nginx_444) Nginx 444 
   * [enable CSF Firewall native fail2ban like support](https://community.centminmod.com/posts/62343/)
   * [Custom REGEX rules for CSF](https://forum.configserver.com/viewtopic.php?t=7517)
   * [sillsdev/ops-ansible-common-roles](https://github.com/sillsdev/ops-ansible-common-roles/blob/master/csf_config/files/regex.custom.pm)
-  * [rlunar/Ajenti](https://github.com/rlunar/Ajenti/blob/master/csf/regex.pm)
   * [configserver](http://www.configserver.com)
 
 ## Donations 
