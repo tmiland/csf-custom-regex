@@ -130,43 +130,45 @@ if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*limiting connections by z
 }
 
 # Source: https://github.com/sillsdev/ops-ansible-common-roles/blob/master/csf_config/files/regex.custom.pm
+# Default: 5 errors bans permanant (Uses settings from LF_SMTPAUTH)
 # postfix/smtpd UNKNOWN from unknown
-#if (($lgfile eq $config{SMTPAUTH_LOG})
-if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /postfix\/smtpd[^U]*UNKNOWN from unknown\[(\d+\.\d+\.\d+\.\d+)\]/)) {
-    $ip = $1; $acc = ""; $ip =~ s/^::ffff://;
+  if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /postfix\/smtpd[^U]*UNKNOWN from unknown\[(\d+\.\d+\.\d+\.\d+)\]/)) {
+    $ip = $1; $acc = ""; 
+    $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("UNKNOWN from unknown from","$ip|$acc","postfix_unknown")} else {return}
   }
 
 # postfix/smtpd lost connection after AUTH
-if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /postfix\/smtpd\[\d+\]: lost connection after AUTH from [^\[]+\[(\d+\.\d+\.\d+\.\d+)\]/)) {
-    $ip = $1; $acc = ""; $ip =~ s/^::ffff://;
+# Default: 5 errors bans permanant (Uses settings from LF_SMTPAUTH)
+  if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /postfix\/smtpd\[\d+\]: lost connection after AUTH from [^\[]+\[(\d+\.\d+\.\d+\.\d+)\]/)) {
+    $ip = $1; $acc = ""; 
+    $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("lost connection after AUTH from","$ip|$acc","postfix_lost")} else {return}
   }
 
 # postfix/smtpd disconnect from unknown
-if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /postfix\/smtpd[^U]*disconnect from unknown\[(\d+\.\d+\.\d+\.\d+)\]/)) {
-    $ip = $1; $acc = ""; $ip =~ s/^::ffff://;
+# Default: 5 errors bans permanant (Uses settings from LF_SMTPAUTH)
+  if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /postfix\/smtpd[^U]*disconnect from unknown\[(\d+\.\d+\.\d+\.\d+)\]/)) {
+    $ip = $1; $acc = ""; 
+    $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("lost connection after AUTH from","$ip|$acc","postfix_disconnect")} else {return}
   }
 
 # postfix/smtpd disconnect from domain[ip-address]
-if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/submission\/smtpd\[\d+\]: disconnect from \S+\[(\S+)\]/)) {
-    $ip = $1; $acc = ""; $ip =~ s/^::ffff://;
+# Default: 5 errors bans permanant (Uses settings from LF_SMTPAUTH)
+  if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/submission\/smtpd\[\d+\]: disconnect from \S+\[(\S+)\]/)) {
+    $ip = $1; $acc = ""; 
+    $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("lost connection after AUTH from","$ip|$acc","postfix_disconnect")} else {return}
   }
 
-#Postfix SMTP SASL AUTH
-# Source: https://github.com/rlunar/Ajenti/blob/20a9d53a0110dc8cc90eccd9c1e9706d0b050c75/csf/regex.pm#L310-L314
-if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ postfix\/smtpd(?:\[\d+\])?: warning: \S+\[(\S+)\]: SASL (?:LOGIN|PLAIN|(?:CRAM|DIGEST)-MD5) authentication failed/)) {
-    $ip = $2; $acc = ""; $ip =~ s/^::ffff://;
-    if (&checkip($ip)) {return ("Failed SASL login from","$ip|$acc","postfix_saslauth")} else {return}
-}
-
-#Postfix SMTP SUBMISSION SASL AUTH
-if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/submission\/smtpd\[\d+\]: warning: \S+\[(\S+)\]: SASL (?:LOGIN|PLAIN|(?:CRAM|DIGEST)-MD5) authentication failed/)) {
-    $ip = $1; $acc = ""; $ip =~ s/^::ffff://;
-    if (&checkip($ip)) {return ("Failed SASL login from","$ip|$acc","postfix_saslauth")} else {return}
-}
+#Postfix SMTP AUTH (Plesk) <-- Default from RegexMain.pm
+# Default: 5 errors bans permanant (Uses settings from LF_SMTPAUTH)
+	if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ postfix\/(submission\/)?smtpd(?:\[\d+\])?: warning: \S+\[(\S+)\]: SASL (?:(?i)LOGIN|PLAIN|(?:CRAM|DIGEST)-MD5) authentication failed/)) {
+		my $ip = $3;
+		$ip =~ s/^::ffff://;
+		if (checkip(\$ip)) {return ("Failed SASL login from","$ip","postfix_saslauth")} else {return}
+	}
 # # postfix discard php header check
 # if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/cleanup[^d]*discard: header X-PHP-Script: [^f]+for (\d+\.\d+\.\d+\.\d+)/)) {
 #     return ("discard via php header check from ",$1,"postfix_discard","2","25,587,80","3600");
