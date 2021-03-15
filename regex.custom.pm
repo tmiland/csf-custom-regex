@@ -129,11 +129,6 @@ if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*limiting connections by z
     return ("NGINX Security rule triggered from",$1,"nginx_conn_limit_localhost","30","80,443","3600","0");
 }
 
-# Block brute force failed SASL attempts. Debian, dovecot / postfix server.
-# Block an IP that has 5 failed SASL login attempts
-# if (($globlogs{SMTPAUTH_LOG} {$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/smtpd\[\d+\]: warning:.*\[(\d+\.\d+\.\d+\.\d+)\]: SASL [A-Z]*? authentication failed/)) {
-#     return ("Failed SASL login from",$1,"mysaslmatch","5","25,465,587","1");
-# }
 # Source: https://github.com/sillsdev/ops-ansible-common-roles/blob/master/csf_config/files/regex.custom.pm
 # postfix/smtpd UNKNOWN from unknown
 if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/smtpd[^U]*UNKNOWN from unknown\[(\d+\.\d+\.\d+\.\d+)\]/)) {
@@ -147,6 +142,11 @@ if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/smtpd\[\d+\]: los
 
 # postfix/smtpd disconnect from unknown
 if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/smtpd[^U]*disconnect from unknown\[(\d+\.\d+\.\d+\.\d+)\]/)) {
+    return ("lost connection after AUTH from",$1,"postfix_disconnect","5","25,587","3600");
+}
+
+# postfix/smtpd disconnect from domain[ip-address]
+if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/submission\/smtpd\[\d+\]: disconnect from \S+\[(\S+)\]/)) {
     return ("lost connection after AUTH from",$1,"postfix_disconnect","5","25,587","3600");
 }
 
