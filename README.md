@@ -14,6 +14,8 @@ $ ./csf_custom_regex.sh [install/status]
 - Install option will download [regex.custom.pm](https://github.com/tmiland/csf-custom-regex/raw/master/regex.custom.pm)
 - Status option will run ```fgrep 'LF_CUSTOMTRIGGER' /var/log/lfd.log | tail -100```
 
+You will see lines like: ```Mar 15 00:05:46 vps lfd[688]: (nginx_444) Nginx 444 [IP Adress] (CA/Canada/-): 5 in the last 3600 secs - *Blocked in csf* for 86400 secs [LF_CUSTOMTRIGGER]```
+
 **Logpaths are currently hardcoded to match Debian 10 with Virtualmin.**
 
 ## Compatibility and Requirements
@@ -26,6 +28,7 @@ $ ./csf_custom_regex.sh [install/status]
 ## Credits
 - Code is customized from these sources:
   * [enable CSF Firewall native fail2ban like support](https://community.centminmod.com/posts/62343/)
+  * [Custom REGEX rules for CSF](https://forum.configserver.com/viewtopic.php?t=7517)
   * [sillsdev/ops-ansible-common-roles](https://github.com/sillsdev/ops-ansible-common-roles/blob/master/csf_config/files/regex.custom.pm)
   * [rlunar/Ajenti](https://github.com/rlunar/Ajenti/blob/master/csf/regex.pm)
   * [configserver](http://www.configserver.com)
