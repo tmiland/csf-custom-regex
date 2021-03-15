@@ -3,6 +3,11 @@
 
 ### ***Work in progress***
 
+See the script in action:
+<a href="https://www.abuseipdb.com/user/28030" title="AbuseIPDB is an IP address blacklist for webmasters and sysadmins to report IP addresses engaging in abusive behavior on their networks" alt="AbuseIPDB Contributor Badge">
+	<img src="https://www.abuseipdb.com/contributor/28030.svg" style="width: 401px;">
+</a>
+
 Inspiration from: [enable CSF Firewall native fail2ban like support](https://community.centminmod.com/posts/62343/)
 
 ```bash
