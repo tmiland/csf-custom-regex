@@ -40,128 +40,128 @@ sub custom_line {
 # /var/log/virtualmin/*_access_log
 # Nginx 444  (Default: 5 errors bans for 24 hours)
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST|HEAD].*(\s444\s)/)) {
-      return ("Nginx 444",$1,"nginx_444","5","80,443","86400","0");
+    return ("Nginx 444",$1,"nginx_444","5","80,443","86400","0");
   }
 
 # /var/log/nginx/access.log
 # Nginx 444  (Default: 5 errors bans for 24 hours)
   if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST|HEAD].*(\s444\s)/)) {
-      return ("Nginx 444",$1,"nginx_444","5","80,443","86400","0");
+    return ("Nginx 444",$1,"nginx_444","5","80,443","86400","0");
   }
 
 # /var/log/virtualmin/*_error_log
 # NginX security rules trigger (Default: 40 errors bans for 24 hours)
   if (($globlogs{CUSTOM2_LOG}{$lgfile}) and ($line =~ /.*access forbidden by rule, client: (\S+).*/)) {
-      return ("NGINX Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
+    return ("NGINX Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
   }
 
 # /var/log/nginx/localhost.error.log
 # NginX security rules trigger (Default: 40 errors bans for 24 hours)
   if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*access forbidden by rule, client: (\S+).*/)) {
-      return ("NGINX Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
+    return ("NGINX Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
   }
 
 # /var/log/virtualmin/*_error_log
 # NginX 404 errors (Default: 50 errors bans for 24 hours)
   if (($globlogs{CUSTOM2_LOG}{$lgfile}) and ($line =~ /.*No such file or directory\), client: (\S+),.*/)) {
-      return ("NGINX Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
+    return ("NGINX Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
   }
 
 # /var/log/nginx/localhost.error.log
 # NginX 404 errors (Default: 50 errors bans for 24 hours)
   if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*No such file or directory\), client: (\S+),.*/)) {
-      return ("NGINX Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
+    return ("NGINX Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
   }
 
 # /var/log/virtualmin/*_access_log
 #Trying to download htaccess or htpasswd  (Default: 2 error bans for 24 hours)
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /.*\.(htpasswd|htaccess).*client: (\S+),.*GET/)) {
-      return ("Trying to download .ht files",$1,"nginx_htfiles","2","80,443","86400","0");
+    return ("Trying to download .ht files",$1,"nginx_htfiles","2","80,443","86400","0");
   }
 
 # /var/log/nginx/access.log
 #Trying to download htaccess or htpasswd  (Default: 2 error bans for 24 hours)
   if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /.*\.(htpasswd|htaccess).*client: (\S+),.*GET/)) {
-      return ("Trying to download .ht files",$1,"nginx_htfiles","2","80,443","86400","0");
+    return ("Trying to download .ht files",$1,"nginx_htfiles","2","80,443","86400","0");
   }
 
 # Wordpress fail2ban plugin https://wordpress.org/plugins/wp-fail2ban-redux/
 # (Default: 2 errors bans for 24 hours)
   if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*Authentication attempt for unknown user .* from (.*)\n/)) {
-      return ("Wordpress unknown user from",$1,"fail2ban_unknownuser","2","80,443","86400","0");
+    return ("Wordpress unknown user from",$1,"fail2ban_unknownuser","2","80,443","86400","0");
   }
 
 # Wordpress fail2ban plugin https://wordpress.org/plugins/wp-fail2ban-redux/
 # (Default: 2 errors bans for 24 hours)
   if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*Blocked user enumeration attempt from (.*)\n/)) {
-      return ("WordPress user enumeration attempt from",$1,"fail2ban_userenum","2","80,443","86400","0");
+    return ("WordPress user enumeration attempt from",$1,"fail2ban_userenum","2","80,443","86400","0");
   }
 
 # Wordpress fail2ban plugin https://wordpress.org/plugins/wp-fail2ban-redux/
 # (Default: 2 errors bans for 24 hours)
   if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*Pingback error .* generated from (.*)\n/)) {
-      return ("WordPress pingback error",$1,"fail2ban_pingback","2","80,443","86400","0");
+    return ("WordPress pingback error",$1,"fail2ban_pingback","2","80,443","86400","0");
   }
 
 # Wordpress fail2ban plugin https://wordpress.org/plugins/wp-fail2ban-redux/
 # (Default: 2 errors bans for 24 hours)
   if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*Spammed comment from (.*)\n/)) {
-      return ("WordPress spam comments from",$1,"fail2ban_spam","2","80,443","86400","0");
+    return ("WordPress spam comments from",$1,"fail2ban_spam","2","80,443","86400","0");
   }
 
 # Wordpress fail2ban plugin https://wordpress.org/plugins/wp-fail2ban-redux/
 # (Default: 2 errors bans for 24 hours)
   if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*XML-RPC multicall authentication failure (.*)\n/)) {
-      return ("WordPress XML-RPC multicall fail from",$1,"fail2ban_xmlrpc","5","80,443","86400","0");
+    return ("WordPress XML-RPC multicall fail from",$1,"fail2ban_xmlrpc","5","80,443","86400","0");
   }
 
 # /var/log/virtualmin/*_error_log
 # https://community.centminmod.com/posts/74546/
 # Nginx connection limit rule trigger (Default: 30 errors bans for 60mins)
   if (($globlogs{CUSTOM2_LOG}{$lgfile}) and ($line =~ /.*limiting connections by zone .*, client: (\S+),(.*)/)) {
-      return ("NGINX Security rule triggered from",$1,"nginx_conn_limit","30","80,443","3600","0");
+    return ("NGINX Security rule triggered from",$1,"nginx_conn_limit","30","80,443","3600","0");
   }
 
 # /var/log/nginx/localhost.error.log
 # https://community.centminmod.com/posts/74546/
 # Nginx connection limit rule trigger (Default: 30 errors bans for 60mins)
   if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*limiting connections by zone .*, client: (\S+),(.*)/)) {
-      return ("NGINX Security rule triggered from",$1,"nginx_conn_limit_localhost","30","80,443","3600","0");
+    return ("NGINX Security rule triggered from",$1,"nginx_conn_limit_localhost","30","80,443","3600","0");
   }
 # Source: https://www.digitalflare.co.uk/blog/view/blocking-wp-login-and-xmlrpc-brute-force-attacks-with-csf-cpanel/
 # XMLRPC
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(xmlrpc.php)/)) {
-  return ("WP XMLPRC Attack",$1,"xmlrpc","3","80,443","1");
+    return ("WP XMLPRC Attack",$1,"xmlrpc","3","80,443","1");
   }
 
 # WP-LOGINS
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wp-login.php)/)) {
-      return ("WP Login Attack",$1,"wplogin","3","80,443","1");
+    return ("WP Login Attack",$1,"wplogin","3","80,443","1");
   }
 
 # WP-ADMINS
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wp-admins.php)/)) {
-      return ("WP ADMIN Attack",$1,"wpadmin","3","80,443","1");
+    return ("WP ADMIN Attack",$1,"wpadmin","3","80,443","1");
   }
 
 # WP-PLUGIN
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wp-cl-plugin.php)/)) {
-      return ("WP wp-cl-plugin Attack",$1,"wpplugin","3","80,443","1");
+    return ("WP wp-cl-plugin Attack",$1,"wpplugin","3","80,443","1");
   }
 
 # wlwmanifest.xml
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wlwmanifest.xml)/)) {
-      return ("WP wlwmanifest.xml Attack",$1,"manifest","3","80,443","1");
+    return ("WP wlwmanifest.xml Attack",$1,"manifest","3","80,443","1");
   }
 
 # shell.php
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(shell.php)/)) {
-      return ("SHELL shell.php Attack",$1,"shell","3","80,443","1");
+    return ("SHELL shell.php Attack",$1,"shell","3","80,443","1");
   }
 
 # xing.php
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(xing.php)/)) {
-      return ("XING xing.php Attack",$1,"xing","3","80,443","1");
+    return ("XING xing.php Attack",$1,"xing","3","80,443","1");
   }
 
 # Source: https://github.com/sillsdev/ops-ansible-common-roles/blob/master/csf_config/files/regex.custom.pm
@@ -295,28 +295,28 @@ sub custom_line {
 	}
 #dovecot <-- Default from RegexMain.pm
 	if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot(\[\d+\])?: pop3-login: (Aborted login|Disconnected|Disconnected: Inactivity)( \(auth failed, \d+ attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )?method=\S+, rip=(\S+), lip=/)) {
-        my $ip = $8;
+    my $ip = $8;
 		my $acc = $7;
 		$ip =~ s/^::ffff://;
 		$acc =~ s/^<|>$//g;
 		if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
 	}
 	if (($config{LF_IMAPD}) and ($globlogs{IMAPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot(\[\d+\])?: imap-login: (Aborted login|Disconnected|Disconnected: Inactivity)( \(auth failed, \d+ attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )?method=\S+, rip=(\S+), lip=/)) {
-        my $ip = $8;
+    my $ip = $8;
 		my $acc = $7;
 		$ip =~ s/^::ffff://;
 		$acc =~ s/^<|>$//g;
 		if (checkip(\$ip)) {return ("Failed IMAP login from","$ip|$acc","imapd")} else {return}
 	}
 	if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) pop3-login: Info: (Aborted login|Disconnected|Disconnected: Inactivity)( \(auth failed, \d+ attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )?method=\S+, rip=(\S+), lip=/)) {
-        my $ip = $7;
+    my $ip = $7;
 		my $acc = $6;
 		$ip =~ s/^::ffff://;
 		$acc =~ s/^<|>$//g;
 		if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
 	}
 	if (($config{LF_IMAPD}) and ($globlogs{IMAPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) imap-login: Info: (Aborted login|Disconnected|Disconnected: Inactivity)( \(auth failed, \d+ attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )?method=\S+, rip=(\S+), lip=/)) {
-        my $ip = $7;
+    my $ip = $7;
 		my $acc = $6;
 		$ip =~ s/^::ffff://;
 		$acc =~ s/^<|>$//g;
