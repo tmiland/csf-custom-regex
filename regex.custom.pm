@@ -258,6 +258,35 @@ sub custom_line {
 		$ip =~ s/^::ffff://;
 		if (checkip(\$ip)) {return ("Failed Webmin login from","$ip|$acc","webmin")} else {return}
 	}
+#dovecot <-- Default from RegexMain.pm
+	if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot(\[\d+\])?: pop3-login: (Aborted login|Disconnected|Disconnected: Inactivity)( \(auth failed, \d+ attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )?method=\S+, rip=(\S+), lip=/)) {
+        my $ip = $8;
+		my $acc = $7;
+		$ip =~ s/^::ffff://;
+		$acc =~ s/^<|>$//g;
+		if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
+	}
+	if (($config{LF_IMAPD}) and ($globlogs{IMAPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot(\[\d+\])?: imap-login: (Aborted login|Disconnected|Disconnected: Inactivity)( \(auth failed, \d+ attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )?method=\S+, rip=(\S+), lip=/)) {
+        my $ip = $8;
+		my $acc = $7;
+		$ip =~ s/^::ffff://;
+		$acc =~ s/^<|>$//g;
+		if (checkip(\$ip)) {return ("Failed IMAP login from","$ip|$acc","imapd")} else {return}
+	}
+	if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) pop3-login: Info: (Aborted login|Disconnected|Disconnected: Inactivity)( \(auth failed, \d+ attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )?method=\S+, rip=(\S+), lip=/)) {
+        my $ip = $7;
+		my $acc = $6;
+		$ip =~ s/^::ffff://;
+		$acc =~ s/^<|>$//g;
+		if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
+	}
+	if (($config{LF_IMAPD}) and ($globlogs{IMAPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) imap-login: Info: (Aborted login|Disconnected|Disconnected: Inactivity)( \(auth failed, \d+ attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )?method=\S+, rip=(\S+), lip=/)) {
+        my $ip = $7;
+		my $acc = $6;
+		$ip =~ s/^::ffff://;
+		$acc =~ s/^<|>$//g;
+		if (checkip(\$ip)) {return ("Failed IMAP login from","$ip|$acc","imapd")} else {return}
+	}
 # If the matches in this file are not syntactically correct for perl then lfd
 # will fail with an error. You are responsible for the security of any regex
 # expressions you use. Remember that log file spoofing can exploit poorly
