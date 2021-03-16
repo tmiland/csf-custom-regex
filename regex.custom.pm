@@ -130,37 +130,37 @@ sub custom_line {
   }
 # Source: https://www.digitalflare.co.uk/blog/view/blocking-wp-login-and-xmlrpc-brute-force-attacks-with-csf-cpanel/
 # XMLRPC
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /xmlrpc.php.*" /)) {
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /xmlrpc.php.*"/)) {
   return ("WP XMLPRC Attack",$1,"xmlrpc","3","80,443","1");
   }
 
 # WP-LOGINS
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /wp-login.php.*" /)) {
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /wp-login.php.*"/)) {
       return ("WP Login Attack",$1,"wplogin","3","80,443","1");
   }
 
 # WP-ADMINS
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /wp-admins.php.*" /)) {
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /wp-admins.php.*"/)) {
       return ("WP ADMIN Attack",$1,"wpadmin","3","80,443","1");
   }
 
 # WP-PLUGIN
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /wp-cl-plugin.php.*" /)) {
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /wp-cl-plugin.php.*"/)) {
       return ("WP wp-cl-plugin Attack",$1,"wpplugin","3","80,443","1");
   }
 
 # wlwmanifest.xml
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /wlwmanifest.xml.*" /)) {
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /wlwmanifest.xml.*"/)) {
       return ("WP wlwmanifest.xml Attack",$1,"manifest","3","80,443","1");
   }
 
 # shell.php
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /shell.php.*" /)) {
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /shell.php.*"/)) {
       return ("SHELL shell.php Attack",$1,"shell","3","80,443","1");
   }
 
 # xing.php
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /xing.php.*" /)) {
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(S+).*] "w*(?:GET|POST) /xing.php.*"/)) {
       return ("XING xing.php Attack",$1,"xing","3","80,443","1");
   }
 
