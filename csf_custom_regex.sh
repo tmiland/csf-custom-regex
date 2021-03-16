@@ -74,7 +74,9 @@ echo
 }
 
 status() {
-fgrep 'LF_CUSTOMTRIGGER' /var/log/lfd.log | tail -100
+  echo "---------------------------------------"
+  echo "Latest Banned IP Addresses:"
+  tail -f /var/log/lfd.log | grep 'LF_CUSTOMTRIGGER'
 }
 
 case "$1" in
