@@ -17,7 +17,7 @@ $ ./csf_custom_regex.sh [install/status]
 ```
 
 - Install option will download [regex.custom.pm](https://github.com/tmiland/csf-custom-regex/raw/master/regex.custom.pm)
-- Status option will run ```fgrep 'LF_CUSTOMTRIGGER' /var/log/lfd.log | tail -100```
+- Status option will run ```tail -f /var/log/lfd.log | grep 'LF_CUSTOMTRIGGER'```
 
 You will see lines like: ```Mar 15 00:05:46 vps lfd[688]: (nginx_444) Nginx 444 [IP Adress] (CA/Canada/-): 5 in the last 3600 secs - *Blocked in csf* for 86400 secs [LF_CUSTOMTRIGGER]```
 
