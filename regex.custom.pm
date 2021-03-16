@@ -185,6 +185,79 @@ if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*limiting connections by z
 #     return ("Client host rejected: hostname not found",$1,"smtphostname","4","","86400","0");
 # }
 
+#proftpd <-- Default from RegexMain.pm
+	if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? - no such user \'(\S*)\'/)) {
+    my $ip = $2;
+		my $acc = $4;
+		$ip =~ s/^::ffff://;
+		$acc =~ s/:$//g;
+		if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
+	}
+	if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? USER (\S*) no such user found from/)) {
+    my $ip = $2;
+		my $acc = $4;
+		$ip =~ s/^::ffff://;
+		$acc =~ s/:$//g;
+		if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
+	}
+	if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? - SECURITY VIOLATION/)) {
+    my $ip = $2;
+		my $acc = "";
+		$ip =~ s/^::ffff://;
+		$acc =~ s/:$//g;
+		if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
+	}
+	if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? - USER (\S*) \(Login failed\): Incorrect password/)) {
+    my $ip = $2;
+		my $acc = $4;
+		$ip =~ s/^::ffff://;
+		$acc =~ s/:$//g;
+		if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
+	}
+#nginx <-- Default from RegexMain.pm
+	if (($config{LF_HTACCESS}) and ($globlogs{HTACCESS_LOG}{$lgfile}) and ($line =~ /^\S+ \S+ \[error\] \S+ \*\S+ no user\/password was provided for basic authentication, client: (\S+),/)) {
+    my $ip = $1;
+		my $acc = "";
+		$ip =~ s/^::ffff://;
+		if (checkip(\$ip)) {return ("Failed web page login from","$ip|$acc","htpasswd")} else {return}
+	}
+	if (($config{LF_HTACCESS}) and ($globlogs{HTACCESS_LOG}{$lgfile}) and ($line =~ /^\S+ \S+ \[error\] \S+ \*\S+ user \"(\S*)\": password mismatch, client: (\S+),/)) {
+        my $ip = $2;
+		my $acc = $1;
+		$ip =~ s/^::ffff://;
+		if (checkip(\$ip)) {return ("Failed web page login from","$ip|$acc","htpasswd")} else {return}
+	}
+	if (($config{LF_HTACCESS}) and ($globlogs{HTACCESS_LOG}{$lgfile}) and ($line =~ /^\S+ \S+ \[error\] \S+ \*\S+ user \"(\S*)\" was not found in \".*?\", client: (\S+),/)) {
+    my $ip = $2;
+		my $acc = $1;
+		$ip =~ s/^::ffff://;
+		if (checkip(\$ip)) {return ("Failed web page login from","$ip|$acc","htpasswd")} else {return}
+	}
+#mod_security v2 (nginx) <-- Default from RegexMain.pm
+	if (($config{LF_MODSEC}) and ($globlogs{MODSEC_LOG}{$lgfile}) and ($line =~ /^\S+ \S+ \[\S+\] \S+ \[client (\S+)\] ModSecurity:(( \[[^]]+\])*)? Access denied/)) {
+        my $ip = $1;
+		my $acc = "";
+		my $domain = "";
+		if ($line =~ /\] \[hostname "([^\"]+)"\] \[/) {$domain = $1}
+		$ip =~ s/^::ffff://;
+		my $ruleid = "unknown";
+		if ($line =~ /\[id "(\d+)"\]/) {$ruleid = $1}
+		if (checkip(\$ip)) {return ("mod_security (id:$ruleid) triggered by","$ip|$acc|$domain","mod_security")} else {return}
+	}
+#BIND <-- Default from RegexMain.pm
+	if (($config{LF_BIND}) and ($globlogs{BIND_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ named\[\d+\]: client (\S+)\#\d+(\s\(\S+\))?\:( view external\:)? (update|zone transfer|query \(cache\)) \'[^\']*\' denied$/)) {
+        my $ip = $2;
+		my $acc = "";
+		$ip =~ s/^::ffff://;
+		if (checkip(\$ip)) {return ("bind triggered by","$ip|$acc","bind")} else {return}
+	}
+#webmin <-- Default from RegexMain.pm
+	if (($config{LF_WEBMIN}) and ($globlogs{WEBMIN_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ webmin\[\d+\]: Invalid login as (\S+) from (\S+)/)) {
+        my $ip = $3;
+		my $acc = $2;
+		$ip =~ s/^::ffff://;
+		if (checkip(\$ip)) {return ("Failed Webmin login from","$ip|$acc","webmin")} else {return}
+	}
 # If the matches in this file are not syntactically correct for perl then lfd
 # will fail with an error. You are responsible for the security of any regex
 # expressions you use. Remember that log file spoofing can exploit poorly
