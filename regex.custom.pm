@@ -52,25 +52,25 @@ sub custom_line {
 # /var/log/virtualmin/*_error_log
 # NginX security rules trigger (Default: 40 errors bans for 24 hours)
   if (($globlogs{CUSTOM2_LOG}{$lgfile}) and ($line =~ /.*access forbidden by rule, client: (\S+).*/)) {
-    return ("NGINX Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
+    return ("Nginx Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
   }
 
 # /var/log/nginx/error.log
 # NginX security rules trigger (Default: 40 errors bans for 24 hours)
   if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*access forbidden by rule, client: (\S+).*/)) {
-    return ("NGINX Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
+    return ("Nginx Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
   }
 
 # /var/log/virtualmin/*_error_log
 # NginX 404 errors (Default: 50 errors bans for 24 hours)
   if (($globlogs{CUSTOM2_LOG}{$lgfile}) and ($line =~ /.*No such file or directory\), client: (\S+),.*/)) {
-    return ("NGINX Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
+    return ("Nginx Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
   }
 
 # /var/log/nginx/error.log
 # NginX 404 errors (Default: 50 errors bans for 24 hours)
   if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*No such file or directory\), client: (\S+),.*/)) {
-    return ("NGINX Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
+    return ("Nginx Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
   }
 
 # /var/log/virtualmin/*_access_log
@@ -119,39 +119,39 @@ sub custom_line {
 # https://community.centminmod.com/posts/74546/
 # Nginx connection limit rule trigger (Default: 5 errors bans for 60mins)
   if (($globlogs{CUSTOM2_LOG}{$lgfile}) and ($line =~ /.*limiting connections by zone .*, client: (\S+),(.*)/)) {
-    return ("NGINX Security rule triggered from",$1,"nginx_conn_limit","5","80,443","3600","0");
+    return ("Nginx Security rule triggered from",$1,"nginx_conn_limit","5","80,443","3600","0");
   }
 
 # /var/log/nginx/error.log
 # https://community.centminmod.com/posts/74546/
 # Nginx connection limit rule trigger (Default: 5 errors bans for 60mins)
   if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*limiting connections by zone .*, client: (\S+),(.*)/)) {
-    return ("NGINX Security rule triggered from",$1,"nginx_conn_limit_localhost","5","80,443","3600","0");
+    return ("Nginx Security rule triggered from",$1,"nginx_conn_limit_localhost","5","80,443","3600","0");
   }
 # Source: https://www.digitalflare.co.uk/blog/view/blocking-wp-login-and-xmlrpc-brute-force-attacks-with-csf-cpanel/
-# XMLRPC
+# WordPress XMLRPC
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(xmlrpc.php)/)) {
-    return ("WP XMLPRC Attack",$1,"xmlrpc","3","80,443","1");
+    return ("WordPress XMLPRC Attack",$1,"wordpress_xmlrpc","3","80,443","1");
   }
 
-# WP-LOGINS
+# WordPress-LOGINS
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wp-login.php)/)) {
-    return ("WP Login Attack",$1,"wplogin","3","80,443","1");
+    return ("WordPress Login Attack",$1,"wordpress_login","3","80,443","1");
   }
 
-# WP-ADMINS
+# WordPress-ADMINS
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wp-admins.php)/)) {
-    return ("WP ADMIN Attack",$1,"wpadmin","3","80,443","1");
+    return ("WordPress ADMIN Attack",$1,"wordpress_admin","3","80,443","1");
   }
 
-# WP-PLUGIN
+# WordPress-PLUGIN
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wp-cl-plugin.php)/)) {
-    return ("WP wp-cl-plugin Attack",$1,"wpplugin","3","80,443","1");
+    return ("WordPress wp-cl-plugin Attack",$1,"wordpress_plugin","3","80,443","1");
   }
 
-# wlwmanifest.xml
+# WordPress-wlwmanifest.xml
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wlwmanifest.xml)/)) {
-    return ("WP wlwmanifest.xml Attack",$1,"manifest","3","80,443","1");
+    return ("WordPress wlwmanifest.xml Attack",$1,"manifest","3","80,443","1");
   }
 
 # shell.php
