@@ -55,7 +55,7 @@ sub custom_line {
     return ("NGINX Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
   }
 
-# /var/log/nginx/localhost.error.log
+# /var/log/nginx/error.log
 # NginX security rules trigger (Default: 40 errors bans for 24 hours)
   if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*access forbidden by rule, client: (\S+).*/)) {
     return ("NGINX Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
@@ -67,7 +67,7 @@ sub custom_line {
     return ("NGINX Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
   }
 
-# /var/log/nginx/localhost.error.log
+# /var/log/nginx/error.log
 # NginX 404 errors (Default: 50 errors bans for 24 hours)
   if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*No such file or directory\), client: (\S+),.*/)) {
     return ("NGINX Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
@@ -117,16 +117,16 @@ sub custom_line {
 
 # /var/log/virtualmin/*_error_log
 # https://community.centminmod.com/posts/74546/
-# Nginx connection limit rule trigger (Default: 30 errors bans for 60mins)
+# Nginx connection limit rule trigger (Default: 5 errors bans for 60mins)
   if (($globlogs{CUSTOM2_LOG}{$lgfile}) and ($line =~ /.*limiting connections by zone .*, client: (\S+),(.*)/)) {
-    return ("NGINX Security rule triggered from",$1,"nginx_conn_limit","30","80,443","3600","0");
+    return ("NGINX Security rule triggered from",$1,"nginx_conn_limit","5","80,443","3600","0");
   }
 
-# /var/log/nginx/localhost.error.log
+# /var/log/nginx/error.log
 # https://community.centminmod.com/posts/74546/
-# Nginx connection limit rule trigger (Default: 30 errors bans for 60mins)
+# Nginx connection limit rule trigger (Default: 5 errors bans for 60mins)
   if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*limiting connections by zone .*, client: (\S+),(.*)/)) {
-    return ("NGINX Security rule triggered from",$1,"nginx_conn_limit_localhost","30","80,443","3600","0");
+    return ("NGINX Security rule triggered from",$1,"nginx_conn_limit_localhost","5","80,443","3600","0");
   }
 # Source: https://www.digitalflare.co.uk/blog/view/blocking-wp-login-and-xmlrpc-brute-force-attacks-with-csf-cpanel/
 # XMLRPC
