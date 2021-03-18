@@ -130,35 +130,35 @@ sub custom_line {
   }
 
 # WordPress Catch all
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(\/wp-admin|wp-admins.php|administrator\/|login.php|backend|admin|\/xmlrpc.php|\/wp-(app|cron|login|register|mail).php|wp-.*.php|wp-comments-popup.php|wp-links-opml.php|wp-locations.php|sitemap(_index)?.xml|wlwmanifest.xml|wp-cl-plugin.php|[a-z0-9_-]+-sitemap([0-9]+)?.xml)/)) {
-    return ("WordPress Catch all Attack",$1,"wordpress","7","80,443","1");
-  }
+  # if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(\/wp-admin|wp-admins.php|administrator\/|login.php|backend|admin|\/xmlrpc.php|\/wp-(app|cron|login|register|mail).php|wp-.*.php|wp-comments-popup.php|wp-links-opml.php|wp-locations.php|sitemap(_index)?.xml|wlwmanifest.xml|wp-cl-plugin.php|[a-z0-9_-]+-sitemap([0-9]+)?.xml)/)) {
+  #   return ("WordPress Catch all Attack",$1,"wordpress","7","80,443","1");
+  # }
 
 # Source: https://www.digitalflare.co.uk/blog/view/blocking-wp-login-and-xmlrpc-brute-force-attacks-with-csf-cpanel/
 # WordPress XMLRPC
-  # if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(xmlrpc.php)/)) {
-  #   return ("WordPress XMLPRC Attack",$1,"wordpress_xmlrpc","3","80,443","1");
-  # }
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(xmlrpc.php)/)) {
+    return ("WordPress XMLPRC Attack",$1,"wordpress_xmlrpc","3","80,443","1");
+  }
 
 # WordPress-LOGINS
-  # if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wp-login.php)/)) {
-  #   return ("WordPress Login Attack",$1,"wordpress_login","3","80,443","1");
-  # }
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wp-login.php)/)) {
+    return ("WordPress Login Attack",$1,"wordpress_login","3","80,443","1");
+  }
 
 # WordPress-ADMINS
-  # if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wp-admins.php)/)) {
-  #   return ("WordPress ADMIN Attack",$1,"wordpress_admin","3","80,443","1");
-  # }
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wp-admins.php)/)) {
+    return ("WordPress ADMIN Attack",$1,"wordpress_admin","3","80,443","1");
+  }
 
 # WordPress-PLUGIN
-  # if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wp-cl-plugin.php)/)) {
-  #   return ("WordPress wp-cl-plugin Attack",$1,"wordpress_plugin","3","80,443","1");
-  # }
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wp-cl-plugin.php)/)) {
+    return ("WordPress wp-cl-plugin Attack",$1,"wordpress_plugin","3","80,443","1");
+  }
 
 # WordPress-wlwmanifest.xml
-  # if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wlwmanifest.xml)/)) {
-  #   return ("WordPress wlwmanifest.xml Attack",$1,"manifest","3","80,443","1");
-  # }
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wlwmanifest.xml)/)) {
+    return ("WordPress wlwmanifest.xml Attack",$1,"manifest","3","80,443","1");
+  }
 
 # shell.php
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(shell.php)/)) {
