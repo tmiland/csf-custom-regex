@@ -130,7 +130,7 @@ sub custom_line {
   }
 
 # WordPress Catch all
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(\/wp-admin|wp-admins.php|administrator\/|login.php|backend|admin|\/xmlrpc.php|\/wp-(app|cron|login|register|mail).php|wp-.*.php|\/feed\/|wp-comments-popup.php|wp-links-opml.php|wp-locations.php|sitemap(_index)?.xml|wlwmanifest.xml|wp-cl-plugin.php|[a-z0-9_-]+-sitemap([0-9]+)?.xml)/)) {
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(\/wp-admin|wp-admins.php|administrator\/|login.php|backend|admin|\/xmlrpc.php|\/wp-(app|cron|login|register|mail).php|wp-.*.php|wp-comments-popup.php|wp-links-opml.php|wp-locations.php|sitemap(_index)?.xml|wlwmanifest.xml|wp-cl-plugin.php|[a-z0-9_-]+-sitemap([0-9]+)?.xml)/)) {
     return ("WordPress Catch all Attack",$1,"wordpress","7","80,443","1");
   }
 
