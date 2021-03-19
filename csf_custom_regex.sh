@@ -86,7 +86,7 @@ install_virtualmin() {
 
 # Check if Virtualmin is installed
 if [[ ! -f /usr/sbin/virtualmin ]]; then
-  echo -e "Error: Virtualmin is not installed."
+  echo -e "Virtualmin is not installed."
   while [[ $install_virtualmin != "y" && $install_virtualmin != "n" ]]; do
     read -p "Do you want to install Virtualmin? [y/n]: " install_virtualmin
   done
@@ -95,7 +95,7 @@ if [[ ! -f /usr/sbin/virtualmin ]]; then
     case $install_virtualmin in
       [Yy]* )
         install_virtualmin
-        break
+        shift
         ;;
       [Nn]* ) 
         break 
@@ -103,7 +103,7 @@ if [[ ! -f /usr/sbin/virtualmin ]]; then
     esac
   done
 elif [[ ! -f /usr/sbin/csf ]]; then
-  echo -e "Error: CSF Firewall is not installed."
+  echo -e "CSF Firewall is not installed."
   while [[ $install_csf != "y" && $install_csf != "n" ]]; do
     read -p "Do you want to install CSF? [y/n]: " install_csf
   done
@@ -112,7 +112,7 @@ elif [[ ! -f /usr/sbin/csf ]]; then
     case $install_csf in
       [Yy]* )
         install_csf
-        break
+        shift
         ;;
       [Nn]* ) 
         break 
