@@ -51,9 +51,9 @@ date=$(date +"%d%m%y-%H%M%S")
   fi
 
 csf_installer_url=https://github.com/tmiland/csf/raw/master/csf_installer.sh
-csf_args=${*:-"-i"}
-shift
 install_csf() {
+  csf_args=${*:-"-i"}
+  shift
   if [[ $(command -v 'curl') ]]; then
     set -- $csf_args
     # shellcheck disable=SC1090
@@ -69,9 +69,9 @@ install_csf() {
 }
 
 virtualmin_installer_url=https://github.com/virtualmin/virtualmin-install/raw/master/virtualmin-install.sh
-virtualmin_args=${*:-"--minimal --bundle LEMP"}
-shift
 install_virtualmin() {
+  virtualmin_args=${*:-"--minimal --bundle LEMP"}
+  shift
   if [[ $(command -v 'curl') ]]; then
     set -- $virtualmin_args
     # shellcheck disable=SC1090
@@ -97,7 +97,7 @@ if [[ ! -f /usr/sbin/virtualmin ]]; then
     case $install_virtualmin in
       [Yy]* )
         install_virtualmin
-        shift
+        break
         ;;
       [Nn]* ) 
         break 
@@ -114,7 +114,7 @@ elif [[ ! -f /usr/sbin/csf ]]; then
     case $install_csf in
       [Yy]* )
         install_csf
-        shift
+        break
         ;;
       [Nn]* ) 
         break 
