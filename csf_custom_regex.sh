@@ -31,20 +31,104 @@
 #set -o pipefail
 #set -o nounset
 #set -o xtrace
+cd "$(dirname "$0")" || exit
+CURRDIR=$(pwd)
+SCRIPT_FILENAME=$(basename "$0")
+cd - > /dev/null || exit
+sfp=$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || greadlink -f "${BASH_SOURCE[0]}" 2>/dev/null)
+if [ -z "$sfp" ]; then sfp=${BASH_SOURCE[0]}; fi
+SCRIPT_DIR=$(dirname "${sfp}")
 date=$(date +"%d%m%y-%H%M%S")
+
+# Make sure that the script runs with root permissions
+  if [[ "$EUID" != 0 ]]; then
+    echo -e "This action needs root permissions."
+    echo -e "Please enter your root password...";
+    cd "$CURRDIR" || exit
+    su -s "$(which bash)" -c "./$SCRIPT_FILENAME $1"
+    cd - > /dev/null || exit
+    exit 0; 
+  fi
+
+csf_installer_url=https://github.com/tmiland/csf/raw/master/csf_installer.sh
+args=${*:-"-i"}
+install_csf() {
+  if [[ $(command -v 'curl') ]]; then
+    set -- $args
+    # shellcheck disable=SC1090
+    source <(curl -sSLf $csf_installer_url)
+  elif [[ $(command -v 'wget') ]]; then
+    set -- $args
+    # shellcheck disable=SC1090
+    . <(wget -qO - $csf_installer_url)
+  else
+    echo -e "This script requires curl or wget.\nProcess aborted"
+    exit 0
+  fi
+}
+
+virtualmin_installer_url=https://github.com/virtualmin/virtualmin-install/raw/master/virtualmin-install.sh
+args=${*:-"--minimal --bundle LEMP"}
+install_virtualmin() {
+  if [[ $(command -v 'curl') ]]; then
+    set -- $args
+    # shellcheck disable=SC1090
+    source <(curl -sSLf $virtualmin_installer_url)
+  elif [[ $(command -v 'wget') ]]; then
+    set -- $args
+    # shellcheck disable=SC1090
+    . <(wget -qO - $virtualmin_installer_url)
+  else
+    echo -e "This script requires curl or wget.\nProcess aborted"
+    exit 0
+  fi
+}
+
 # Check if Virtualmin is installed
 if [[ ! -f /usr/sbin/virtualmin ]]; then
   echo -e "Error: Virtualmin is not installed."
-  exit 1;
+  while [[ $install_virtualmin != "y" && $install_virtualmin != "n" ]]; do
+    read -p "Do you want to install Virtualmin? [y/n]: " install_virtualmin
+  done
+
+  while true; do
+    case $install_virtualmin in
+      [Yy]* )
+        install_virtualmin
+        break
+        ;;
+      [Nn]* ) 
+        break 
+        ;;
+    esac
+  done
+elif [[ ! -f /usr/sbin/csf ]]; then
+  echo -e "Error: CSF Firewall is not installed."
+  while [[ $install_csf != "y" && $install_csf != "n" ]]; do
+    read -p "Do you want to install CSF? [y/n]: " install_csf
+  done
+
+  while true; do
+    case $install_csf in
+      [Yy]* )
+        install_csf
+        break
+        ;;
+      [Nn]* ) 
+        break 
+        ;;
+    esac
+  done
 fi
+
 # enable CSF Firewall native fail2ban like support
 # https://community.centminmod.com/posts/62343/
 install() {
   echo "-------------------------------------------------"
-  echo "install CSF Firewall native fail2ban like support"
+  echo "install CSF Firewall custom regex support"
   echo "-------------------------------------------------"
   echo
-csf --profile backup backup-b4-customregex.$date
+/usr/sbin/csf --profile backup backup-b4-customregex.$date
 cp -a /usr/local/csf/bin/regex.custom.pm /usr/local/csf/bin/regex.custom.pm.bak.$date
 egrep 'CUSTOM1_LOG|CUSTOM2_LOG|CUSTOM3_LOG|CUSTOM4_LOG' /etc/csf/csf.conf
 sed -i "s|CUSTOM1_LOG = .*|CUSTOM1_LOG = \"/var/log/virtualmin/\*_access_log\"|" /etc/csf/csf.conf
@@ -65,10 +149,10 @@ sed -i "s|SYSLOG_LOG   = .*|SYSLOG_LOG = \"/var/log/syslog\"|" /etc/csf/csf.conf
 sed -i "s|WEBMIN_LOG   = .*|WEBMIN_LOG = \"/var/log/auth.log\"|" /etc/csf/csf.conf
 egrep 'HTACCESS_LOG|MODSEC_LOG|SSHD_LOG|FTPD_LOG|SMTPAUTH_LOG|IPTABLES_LOG|BIND_LOG|SYSLOG_LOG|WEBMIN_LOG' /etc/csf/csf.conf
 wget -O /usr/local/csf/bin/regex.custom.pm https://github.com/tmiland/csf-custom-regex/raw/master/regex.custom.pm
-csf -ra
+/usr/sbin/csf -ra
 echo
 echo "---------------------------------------------------"
-echo "CSF Firewall native fail2ban like support installed"
+echo "CSF Firewall custom regex support installed"
 echo "---------------------------------------------------"
 echo
 }
@@ -80,13 +164,13 @@ status() {
 }
 
 case "$1" in
-  install )
+  --install|-i)
     install
     ;;
-  status )
+  --status|-s)
     status
     ;;
-  * )
-    echo "$0 {install|status}"
+  *)
+    echo "$0 {--install|-i|--status|-s}"
     ;;
 esac
