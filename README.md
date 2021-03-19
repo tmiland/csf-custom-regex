@@ -23,6 +23,9 @@ You will see lines like: ```Mar 15 00:05:46 vps lfd[688]: (nginx_444) Nginx 444 
 
 **Logpaths are currently hardcoded to match Debian 10 with Virtualmin.**
 
+* If Virtualmin or CSF is not installed, you will get the question to install.
+This will source the [Virtualmin install script](https://github.com/virtualmin/virtualmin-install) and [CSF installer script](https://github.com/tmiland/csf)
+
 ## Compatibility and Requirements
 
 * Debian 9 and later
