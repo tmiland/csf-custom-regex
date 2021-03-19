@@ -51,14 +51,15 @@ date=$(date +"%d%m%y-%H%M%S")
   fi
 
 csf_installer_url=https://github.com/tmiland/csf/raw/master/csf_installer.sh
-args=${*:-"-i"}
+csf_args=${*:-"-i"}
+shift
 install_csf() {
   if [[ $(command -v 'curl') ]]; then
-    set -- $args
+    set -- $csf_args
     # shellcheck disable=SC1090
     source <(curl -sSLf $csf_installer_url)
   elif [[ $(command -v 'wget') ]]; then
-    set -- $args
+    set -- $csf_args
     # shellcheck disable=SC1090
     . <(wget -qO - $csf_installer_url)
   else
@@ -68,14 +69,15 @@ install_csf() {
 }
 
 virtualmin_installer_url=https://github.com/virtualmin/virtualmin-install/raw/master/virtualmin-install.sh
-args=${*:-"--minimal --bundle LEMP"}
+virtualmin_args=${*:-"--minimal --bundle LEMP"}
+shift
 install_virtualmin() {
   if [[ $(command -v 'curl') ]]; then
-    set -- $args
+    set -- $virtualmin_args
     # shellcheck disable=SC1090
     source <(curl -sSLf $virtualmin_installer_url)
   elif [[ $(command -v 'wget') ]]; then
-    set -- $args
+    set -- $virtualmin_args
     # shellcheck disable=SC1090
     . <(wget -qO - $virtualmin_installer_url)
   else
