@@ -1,5 +1,5 @@
 # csf custom regex
- enable CSF Firewall native fail2ban like support
+ enable CSF Firewall custom regex support
 
 ### ***Work in progress***
 
@@ -10,10 +10,12 @@ See the script in action:
 
 Inspiration from: [enable CSF Firewall native fail2ban like support](https://community.centminmod.com/posts/62343/)
 
+## Installation
+
 ```bash
 $ wget https://github.com/tmiland/csf-custom-regex/raw/master/csf_custom_regex.sh
 $ chmod +x csf_custom_regex.sh
-$ ./csf_custom_regex.sh [install/status]
+$ ./csf_custom_regex.sh --install
 ```
 
 - Install option will download [regex.custom.pm](https://github.com/tmiland/csf-custom-regex/raw/master/regex.custom.pm)
@@ -25,6 +27,10 @@ You will see lines like: ```Mar 15 00:05:46 vps lfd[688]: (nginx_444) Nginx 444 
 
 * If Virtualmin or CSF is not installed, you will get the question to install.
 This will source the [Virtualmin install script](https://github.com/virtualmin/virtualmin-install) and [CSF installer script](https://github.com/tmiland/csf)
+
+## Tested on:
+
+* Debian 10
 
 ## Compatibility and Requirements
 
