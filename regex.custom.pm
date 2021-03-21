@@ -38,52 +38,56 @@ sub custom_line {
 # rule sets inspired by ethanpill's work at https://community.centminmod.com/posts/49893/
 
 # /var/log/virtualmin/*_access_log
+# /var/log/nginx/access.log
 # Nginx 444  (Default: 5 errors bans for 24 hours)
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST|HEAD].*(\s444\s)/)) {
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) or ($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST|HEAD].*(\s444\s)/)) {
     return ("Nginx 444",$1,"nginx_444","5","80,443","86400","0");
   }
 
 # /var/log/nginx/access.log
 # Nginx 444  (Default: 5 errors bans for 24 hours)
-  if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST|HEAD].*(\s444\s)/)) {
-    return ("Nginx 444",$1,"nginx_444","5","80,443","86400","0");
-  }
+  # if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST|HEAD].*(\s444\s)/)) {
+  #   return ("Nginx 444",$1,"nginx_444","5","80,443","86400","0");
+  # }
 
 # /var/log/virtualmin/*_error_log
+# /var/log/nginx/error.log
 # NginX security rules trigger (Default: 40 errors bans for 24 hours)
-  if (($globlogs{CUSTOM2_LOG}{$lgfile}) and ($line =~ /.*access forbidden by rule, client: (\S+).*/)) {
+  if (($globlogs{CUSTOM2_LOG}{$lgfile}) or ($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*access forbidden by rule, client: (\S+).*/)) {
     return ("Nginx Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
   }
 
 # /var/log/nginx/error.log
 # NginX security rules trigger (Default: 40 errors bans for 24 hours)
-  if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*access forbidden by rule, client: (\S+).*/)) {
-    return ("Nginx Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
-  }
+  # if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*access forbidden by rule, client: (\S+).*/)) {
+  #   return ("Nginx Security rule triggered from",$1,"nginx_security","40","80,443","86400","0");
+  # }
 
 # /var/log/virtualmin/*_error_log
+# /var/log/nginx/error.log
 # NginX 404 errors (Default: 50 errors bans for 24 hours)
-  if (($globlogs{CUSTOM2_LOG}{$lgfile}) and ($line =~ /.*No such file or directory\), client: (\S+),.*/)) {
+  if (($globlogs{CUSTOM2_LOG}{$lgfile}) or ($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*No such file or directory\), client: (\S+),.*/)) {
     return ("Nginx Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
   }
 
 # /var/log/nginx/error.log
 # NginX 404 errors (Default: 50 errors bans for 24 hours)
-  if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*No such file or directory\), client: (\S+),.*/)) {
-    return ("Nginx Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
-  }
+  # if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*No such file or directory\), client: (\S+),.*/)) {
+  #   return ("Nginx Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
+  # }
 
 # /var/log/virtualmin/*_access_log
+# /var/log/nginx/access.log
 #Trying to download htaccess or htpasswd  (Default: 2 error bans for 24 hours)
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /.*\.(htpasswd|htaccess).*client: (\S+),.*GET/)) {
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) or ($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /.*\.(htpasswd|htaccess).*client: (\S+),.*GET/)) {
     return ("Trying to download .ht files",$1,"nginx_htfiles","2","80,443","86400","0");
   }
 
 # /var/log/nginx/access.log
 #Trying to download htaccess or htpasswd  (Default: 2 error bans for 24 hours)
-  if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /.*\.(htpasswd|htaccess).*client: (\S+),.*GET/)) {
-    return ("Trying to download .ht files",$1,"nginx_htfiles","2","80,443","86400","0");
-  }
+  # if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /.*\.(htpasswd|htaccess).*client: (\S+),.*GET/)) {
+  #   return ("Trying to download .ht files",$1,"nginx_htfiles","2","80,443","86400","0");
+  # }
 
 # Wordpress fail2ban plugin https://wordpress.org/plugins/wp-fail2ban-redux/
 # (Default: 2 errors bans for 24 hours)
@@ -116,23 +120,32 @@ sub custom_line {
   }
 
 # /var/log/virtualmin/*_error_log
+# /var/log/nginx/error.log
 # https://community.centminmod.com/posts/74546/
 # Nginx connection limit rule trigger (Default: 5 errors bans for 60mins)
-  if (($globlogs{CUSTOM2_LOG}{$lgfile}) and ($line =~ /.*limiting connections by zone .*, client: (\S+),(.*)/)) {
+  if (($globlogs{CUSTOM2_LOG}{$lgfile}) or ($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*limiting connections by zone .*, client: (\S+),(.*)/)) {
     return ("Nginx Security rule triggered from",$1,"nginx_conn_limit","5","80,443","3600","0");
   }
 
 # /var/log/nginx/error.log
 # https://community.centminmod.com/posts/74546/
 # Nginx connection limit rule trigger (Default: 5 errors bans for 60mins)
-  if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*limiting connections by zone .*, client: (\S+),(.*)/)) {
-    return ("Nginx Security rule triggered from",$1,"nginx_conn_limit_localhost","5","80,443","3600","0");
-  }
+  # if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*limiting connections by zone .*, client: (\S+),(.*)/)) {
+  #   return ("Nginx Security rule triggered from",$1,"nginx_conn_limit_localhost","5","80,443","3600","0");
+  # }
 
 # WordPress Catch all
   # if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(\/wp-admin|wp-admins.php|administrator\/|login.php|backend|admin|\/xmlrpc.php|\/wp-(app|cron|login|register|mail).php|wp-.*.php|wp-comments-popup.php|wp-links-opml.php|wp-locations.php|sitemap(_index)?.xml|wlwmanifest.xml|wp-cl-plugin.php|[a-z0-9_-]+-sitemap([0-9]+)?.xml)/)) {
   #   return ("WordPress Catch all Attack",$1,"wordpress","7","80,443","1");
   # }
+
+# /var/log/virtualmin/*_access_log
+# /var/log/nginx/access.log
+# WordPress Non Existent plugin locations
+# (Default: 2 errors bans for 24 hours)
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) or ($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST|HEAD] (\/wp-content\/plugins\/).*(\s404\s)/)) {
+    return ("WordPress Plugins Honeypot Trap",$1,"wordpress_404","2","80,443","86400","0");
+  }
 
 # Source: https://www.digitalflare.co.uk/blog/view/blocking-wp-login-and-xmlrpc-brute-force-attacks-with-csf-cpanel/
 # WordPress XMLRPC
