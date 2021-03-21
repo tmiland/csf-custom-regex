@@ -133,17 +133,33 @@ sub custom_line {
   # if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(\/wp-admin|wp-admins.php|administrator\/|login.php|backend|admin|\/xmlrpc.php|\/wp-(app|cron|login|register|mail).php|wp-.*.php|wp-comments-popup.php|wp-links-opml.php|wp-locations.php|sitemap(_index)?.xml|wlwmanifest.xml|wp-cl-plugin.php|[a-z0-9_-]+-sitemap([0-9]+)?.xml)/)) {
   #   return ("WordPress Catch all Attack",$1,"wordpress","7","80,443","1");
   # }
+
 # /var/log/virtualmin/*_access_log
 # WordPress Non Existent plugin locations
 # (Default: 2 errors bans for 24 hours)
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST|HEAD] (\/wp-content\/plugins\/).*(\s404\s)/)) {
     return ("WordPress Plugins Honeypot Trap",$1,"wordpress_404","2","80,443","86400","0");
   }
+
 # /var/log/nginx/access.log
 # WordPress Non Existent plugin locations
 # (Default: 2 errors bans for 24 hours)
   if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST|HEAD] (\/wp-content\/plugins\/).*(\s404\s)/)) {
     return ("WordPress Plugins Honeypot Trap",$1,"wordpress_404","2","80,443","86400","0");
+  }
+  
+# /var/log/virtualmin/*_access_log
+# Non Existent Dot directory locations
+# (Default: 2 errors bans for 24 hours)
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /^(\S+) -.*[GET|POST|HEAD] (\/.).*(\s404\s)/)) {
+    return ("Dot directory Honeypot Trap",$1,"nginx_404","2","80,443","86400","0");
+  }
+
+# /var/log/nginx/access.log
+# Non Existent Dot directory locations
+# (Default: 2 errors bans for 24 hours)
+  if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /^(\S+) -.*[GET|POST|HEAD] (\/.).*(\s404\s)/)) {
+    return ("Dot directory Honeypot Trap",$1,"nginx_404","2","80,443","86400","0");
   }
 
 # Source: https://www.digitalflare.co.uk/blog/view/blocking-wp-login-and-xmlrpc-brute-force-attacks-with-csf-cpanel/
