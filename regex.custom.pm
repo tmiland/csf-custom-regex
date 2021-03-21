@@ -151,14 +151,14 @@ sub custom_line {
 # /var/log/virtualmin/*_access_log
 # Non Existent Dot directory locations
 # (Default: 2 errors bans for 24 hours)
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /^(\S+) -.*[GET|POST|HEAD] (\/.).*(\s404\s)/)) {
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /^(\S+) -.*[GET|POST|HEAD] (\/\.).*(\s404\s)/)) {
     return ("Dot directory Honeypot Trap",$1,"nginx_404","2","80,443","86400","0");
   }
 
 # /var/log/nginx/access.log
 # Non Existent Dot directory locations
 # (Default: 2 errors bans for 24 hours)
-  if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /^(\S+) -.*[GET|POST|HEAD] (\/.).*(\s404\s)/)) {
+  if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /^(\S+) -.*[GET|POST|HEAD] (\/\.).*(\s404\s)/)) {
     return ("Dot directory Honeypot Trap",$1,"nginx_404","2","80,443","86400","0");
   }
 
