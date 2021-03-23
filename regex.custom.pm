@@ -162,6 +162,20 @@ sub custom_line {
     return ("Dot directory Honeypot Trap",$1,"nginx_404","2","80,443","86400","0");
   }
 
+# /var/log/virtualmin/*_access_log
+# Accessing the server by Invalid Hostname (IP)
+# (Default: 10 errors bans for 24 hours)
+  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST|HEAD].*(\s410\s)/)) {
+    return ("Invalid Hostname Honeypot Trap",$1,"nginx_410","10","80,443","86400","0");
+  }
+
+# /var/log/nginx/access.log
+# Accessing the server by Invalid Hostname (IP)
+# (Default: 10 errors bans for 24 hours)
+  if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST|HEAD].*(\s410\s)/)) {
+    return ("Invalid Hostname Honeypot Trap",$1,"nginx_410","10","80,443","86400","0");
+  }
+
 # Source: https://www.digitalflare.co.uk/blog/view/blocking-wp-login-and-xmlrpc-brute-force-attacks-with-csf-cpanel/
 # WordPress XMLRPC
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(xmlrpc.php)/)) {
