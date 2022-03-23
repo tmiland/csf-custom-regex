@@ -147,7 +147,7 @@ sub custom_line {
   if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST|HEAD] (\/wp-content\/plugins\/).*(\s404\s)/)) {
     return ("WordPress Plugins Honeypot Trap",$1,"wordpress_404","2","80,443","86400","0");
   }
-  
+
 # /var/log/virtualmin/*_access_log
 # Non Existent Dot directory locations
 # (Default: 2 errors bans for 24 hours)
@@ -216,7 +216,7 @@ sub custom_line {
 # Default: 5 errors bans permanant (Uses settings from LF_SMTPAUTH)
 # postfix/smtpd UNKNOWN from unknown
   if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /postfix\/smtpd[^U]*UNKNOWN from unknown\[(\d+\.\d+\.\d+\.\d+)\]/)) {
-    $ip = $1; $acc = ""; 
+    $ip = $1; $acc = "";
     $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("UNKNOWN from unknown from","$ip|$acc","postfix_unknown")} else {return}
   }
@@ -224,7 +224,7 @@ sub custom_line {
 # postfix/smtpd lost connection after AUTH
 # Default: 5 errors bans permanant (Uses settings from LF_SMTPAUTH)
   if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /postfix\/smtpd\[\d+\]: lost connection after AUTH from [^\[]+\[(\d+\.\d+\.\d+\.\d+)\]/)) {
-    $ip = $1; $acc = ""; 
+    $ip = $1; $acc = "";
     $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("lost connection after AUTH from","$ip|$acc","postfix_lost")} else {return}
   }
@@ -232,7 +232,7 @@ sub custom_line {
 # postfix/smtpd disconnect from unknown
 # Default: 5 errors bans permanant (Uses settings from LF_SMTPAUTH)
   if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /postfix\/smtpd[^U]*disconnect from unknown\[(\d+\.\d+\.\d+\.\d+)\]/)) {
-    $ip = $1; $acc = ""; 
+    $ip = $1; $acc = "";
     $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("lost connection after AUTH from","$ip|$acc","postfix_disconnect")} else {return}
   }
@@ -240,23 +240,15 @@ sub custom_line {
 # postfix/smtpd disconnect from domain[ip-address]
 # Default: 5 errors bans permanant (Uses settings from LF_SMTPAUTH)
   if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/submission\/smtpd\[\d+\]: disconnect from \S+\[(\S+)\]/)) {
-    $ip = $1; $acc = ""; 
+    $ip = $1; $acc = "";
     $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("lost connection after AUTH from","$ip|$acc","postfix_disconnect")} else {return}
   }
-
-#Postfix SMTP AUTH (Plesk) <-- Default from RegexMain.pm
-# Default: 5 errors bans permanant (Uses settings from LF_SMTPAUTH)
-	if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ postfix\/(submission\/)?smtpd(?:\[\d+\])?: warning: \S+\[(\S+)\]: SASL (?:(?i)LOGIN|PLAIN|(?:CRAM|DIGEST)-MD5) authentication failed/)) {
-		my $ip = $3;
-		$ip =~ s/^::ffff://;
-		if (checkip(\$ip)) {return ("Failed SASL login from","$ip","postfix_saslauth")} else {return}
-	}
 # # postfix discard php header check
 # if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/cleanup[^d]*discard: header X-PHP-Script: [^f]+for (\d+\.\d+\.\d+\.\d+)/)) {
 #     return ("discard via php header check from ",$1,"postfix_discard","2","25,587,80","3600");
 # }
-# 
+#
 # # postfix warn php header check
 # if (($lgfile eq $config{SMTPAUTH_LOG}) and ($line =~ /postfix\/cleanup[^w]+warning: header X-PHP-Script: ([^f]+)for (\d+\.\d+\.\d+\.\d+)/)) {
 #     return ("warn via php header check from ",$2,"postfix_warn_php","2","25,587,80","3600");
@@ -268,108 +260,6 @@ sub custom_line {
 #     return ("Client host rejected: hostname not found",$1,"smtphostname","4","","86400","0");
 # }
 
-#proftpd <-- Default from RegexMain.pm
-	if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? - no such user \'(\S*)\'/)) {
-    my $ip = $2;
-		my $acc = $4;
-		$ip =~ s/^::ffff://;
-		$acc =~ s/:$//g;
-		if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
-	}
-	if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? USER (\S*) no such user found from/)) {
-    my $ip = $2;
-		my $acc = $4;
-		$ip =~ s/^::ffff://;
-		$acc =~ s/:$//g;
-		if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
-	}
-	if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? - SECURITY VIOLATION/)) {
-    my $ip = $2;
-		my $acc = "";
-		$ip =~ s/^::ffff://;
-		$acc =~ s/:$//g;
-		if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
-	}
-	if (($config{LF_FTPD}) and ($globlogs{FTPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ proftpd\[\d+\]:? \S+ \([^\[]+\[(\S+)\]\)( -)?:? - USER (\S*) \(Login failed\): Incorrect password/)) {
-    my $ip = $2;
-		my $acc = $4;
-		$ip =~ s/^::ffff://;
-		$acc =~ s/:$//g;
-		if (checkip(\$ip)) {return ("Failed FTP login from","$ip|$acc","ftpd")} else {return}
-	}
-#nginx <-- Default from RegexMain.pm
-	if (($config{LF_HTACCESS}) and ($globlogs{HTACCESS_LOG}{$lgfile}) and ($line =~ /^\S+ \S+ \[error\] \S+ \*\S+ no user\/password was provided for basic authentication, client: (\S+),/)) {
-    my $ip = $1;
-		my $acc = "";
-		$ip =~ s/^::ffff://;
-		if (checkip(\$ip)) {return ("Failed web page login from","$ip|$acc","htpasswd")} else {return}
-	}
-	if (($config{LF_HTACCESS}) and ($globlogs{HTACCESS_LOG}{$lgfile}) and ($line =~ /^\S+ \S+ \[error\] \S+ \*\S+ user \"(\S*)\": password mismatch, client: (\S+),/)) {
-    my $ip = $2;
-		my $acc = $1;
-		$ip =~ s/^::ffff://;
-		if (checkip(\$ip)) {return ("Failed web page login from","$ip|$acc","htpasswd")} else {return}
-	}
-	if (($config{LF_HTACCESS}) and ($globlogs{HTACCESS_LOG}{$lgfile}) and ($line =~ /^\S+ \S+ \[error\] \S+ \*\S+ user \"(\S*)\" was not found in \".*?\", client: (\S+),/)) {
-    my $ip = $2;
-		my $acc = $1;
-		$ip =~ s/^::ffff://;
-		if (checkip(\$ip)) {return ("Failed web page login from","$ip|$acc","htpasswd")} else {return}
-	}
-#mod_security v2 (nginx) <-- Default from RegexMain.pm
-	if (($config{LF_MODSEC}) and ($globlogs{MODSEC_LOG}{$lgfile}) and ($line =~ /^\S+ \S+ \[\S+\] \S+ \[client (\S+)\] ModSecurity:(( \[[^]]+\])*)? Access denied/)) {
-    my $ip = $1;
-		my $acc = "";
-		my $domain = "";
-		if ($line =~ /\] \[hostname "([^\"]+)"\] \[/) {$domain = $1}
-		$ip =~ s/^::ffff://;
-		my $ruleid = "unknown";
-		if ($line =~ /\[id "(\d+)"\]/) {$ruleid = $1}
-		if (checkip(\$ip)) {return ("mod_security (id:$ruleid) triggered by","$ip|$acc|$domain","mod_security")} else {return}
-	}
-#BIND <-- Default from RegexMain.pm
-	if (($config{LF_BIND}) and ($globlogs{BIND_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ named\[\d+\]: client (\S+)\#\d+(\s\(\S+\))?\:( view external\:)? (update|zone transfer|query \(cache\)) \'[^\']*\' denied$/)) {
-    my $ip = $2;
-		my $acc = "";
-		$ip =~ s/^::ffff://;
-		if (checkip(\$ip)) {return ("bind triggered by","$ip|$acc","bind")} else {return}
-	}
-#webmin <-- Default from RegexMain.pm
-	if (($config{LF_WEBMIN}) and ($globlogs{WEBMIN_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ webmin\[\d+\]: Invalid login as (\S+) from (\S+)/)) {
-    my $ip = $3;
-		my $acc = $2;
-		$ip =~ s/^::ffff://;
-		if (checkip(\$ip)) {return ("Failed Webmin login from","$ip|$acc","webmin")} else {return}
-	}
-#dovecot <-- Default from RegexMain.pm
-	if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot(\[\d+\])?: pop3-login: (Aborted login|Disconnected|Disconnected: Inactivity)( \(auth failed, \d+ attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )?method=\S+, rip=(\S+), lip=/)) {
-    my $ip = $8;
-		my $acc = $7;
-		$ip =~ s/^::ffff://;
-		$acc =~ s/^<|>$//g;
-		if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
-	}
-	if (($config{LF_IMAPD}) and ($globlogs{IMAPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot(\[\d+\])?: imap-login: (Aborted login|Disconnected|Disconnected: Inactivity)( \(auth failed, \d+ attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )?method=\S+, rip=(\S+), lip=/)) {
-    my $ip = $8;
-		my $acc = $7;
-		$ip =~ s/^::ffff://;
-		$acc =~ s/^<|>$//g;
-		if (checkip(\$ip)) {return ("Failed IMAP login from","$ip|$acc","imapd")} else {return}
-	}
-	if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) pop3-login: Info: (Aborted login|Disconnected|Disconnected: Inactivity)( \(auth failed, \d+ attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )?method=\S+, rip=(\S+), lip=/)) {
-    my $ip = $7;
-		my $acc = $6;
-		$ip =~ s/^::ffff://;
-		$acc =~ s/^<|>$//g;
-		if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
-	}
-	if (($config{LF_IMAPD}) and ($globlogs{IMAPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) imap-login: Info: (Aborted login|Disconnected|Disconnected: Inactivity)( \(auth failed, \d+ attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )?method=\S+, rip=(\S+), lip=/)) {
-    my $ip = $7;
-		my $acc = $6;
-		$ip =~ s/^::ffff://;
-		$acc =~ s/^<|>$//g;
-		if (checkip(\$ip)) {return ("Failed IMAP login from","$ip|$acc","imapd")} else {return}
-	}
 # If the matches in this file are not syntactically correct for perl then lfd
 # will fail with an error. You are responsible for the security of any regex
 # expressions you use. Remember that log file spoofing can exploit poorly
