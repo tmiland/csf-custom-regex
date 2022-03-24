@@ -274,6 +274,15 @@ if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ 
   if (&checkip($ip)) {return ("$3 ","$ip|$acc","Spoofing")} else {return}
 }
 
+#dovecot
+	if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot: pop3-login: Disconnected (\s*\(no auth attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )rip=(\S+),/)) {
+    $ip = $6;
+		$acc = $4;
+		$ip =~ s/^::ffff://;
+		$acc =~ s/^<|>$//g;
+		if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
+	}
+
 # If the matches in this file are not syntactically correct for perl then lfd
 # will fail with an error. You are responsible for the security of any regex
 # expressions you use. Remember that log file spoofing can exploit poorly
