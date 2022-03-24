@@ -267,6 +267,13 @@ if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ 
   if (&checkip($ip)) {return ("Email Spam: blocked using $4 ","$ip|$acc","Email Spam - Spoofing")} else {return}
 }
 
+# Helo command rejected: Host not found
+if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 450 4\.7\.1 (\S+): (Helo command rejected: Host not found)/)) {
+  $ip = $1; $acc = "";
+  $ip =~ s/^::ffff://;
+  if (&checkip($ip)) {return ("$3 ","$ip|$acc","Spoofing")} else {return}
+}
+
 # If the matches in this file are not syntactically correct for perl then lfd
 # will fail with an error. You are responsible for the security of any regex
 # expressions you use. Remember that log file spoofing can exploit poorly
