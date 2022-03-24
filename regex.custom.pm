@@ -260,6 +260,13 @@ sub custom_line {
 #     return ("Client host rejected: hostname not found",$1,"smtphostname","4","","86400","0");
 # }
 
+# Spammer blocked from known spamlist
+if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 554 5.7.1 Service unavailable; Client host \[(\S+)\] blocked using (\S+)/)) {
+  $ip = $1; $acc = "";
+  $ip =~ s/^::ffff://;
+  if (&checkip($ip)) {return ("Email Spam: blocked using $4 ","$ip|$acc","Email Spam - Spoofing")} else {return}
+}
+
 # If the matches in this file are not syntactically correct for perl then lfd
 # will fail with an error. You are responsible for the security of any regex
 # expressions you use. Remember that log file spoofing can exploit poorly
