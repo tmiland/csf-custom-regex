@@ -47,7 +47,7 @@ date=$(date +"%d%m%y-%H%M%S")
     cd "$CURRDIR" || exit
     su -s "$(which bash)" -c "./$SCRIPT_FILENAME $1"
     cd - > /dev/null || exit
-    exit 0; 
+    exit 0;
   fi
 
 csf_installer_url=https://github.com/tmiland/csf/raw/master/csf_installer.sh
@@ -99,8 +99,8 @@ if [[ ! -f /usr/sbin/virtualmin ]]; then
         install_virtualmin
         break
         ;;
-      [Nn]* ) 
-        break 
+      [Nn]* )
+        break
         ;;
     esac
   done
@@ -116,8 +116,8 @@ elif [[ ! -f /usr/sbin/csf ]]; then
         install_csf
         break
         ;;
-      [Nn]* ) 
-        break 
+      [Nn]* )
+        break
         ;;
     esac
   done
@@ -132,12 +132,13 @@ install() {
   echo
 /usr/sbin/csf --profile backup backup-b4-customregex.$date
 cp -a /usr/local/csf/bin/regex.custom.pm /usr/local/csf/bin/regex.custom.pm.bak.$date
-egrep 'CUSTOM1_LOG|CUSTOM2_LOG|CUSTOM3_LOG|CUSTOM4_LOG' /etc/csf/csf.conf
+egrep 'CUSTOM1_LOG|CUSTOM2_LOG|CUSTOM3_LOG|CUSTOM4_LOG|CUSTOM5_LOG' /etc/csf/csf.conf
 sed -i "s|CUSTOM1_LOG = .*|CUSTOM1_LOG = \"/var/log/virtualmin/\*_access_log\"|" /etc/csf/csf.conf
 sed -i "s|CUSTOM2_LOG = .*|CUSTOM2_LOG = \"/var/log/virtualmin/\*_error_log\"|" /etc/csf/csf.conf
 sed -i "s|CUSTOM3_LOG = .*|CUSTOM3_LOG = \"/var/log/nginx/access.log\"|" /etc/csf/csf.conf
 sed -i "s|CUSTOM4_LOG = .*|CUSTOM4_LOG = \"/var/log/nginx/error.log\"|" /etc/csf/csf.conf
-egrep 'CUSTOM1_LOG|CUSTOM2_LOG|CUSTOM3_LOG|CUSTOM4_LOG' /etc/csf/csf.conf
+sed -i "s|CUSTOM5_LOG = .*|CUSTOM5_LOG = \"/var/log/mysql/error.log\"|" /etc/csf/csf.conf
+egrep 'CUSTOM1_LOG|CUSTOM2_LOG|CUSTOM3_LOG|CUSTOM4_LOG|CUSTOM5_LOG' /etc/csf/csf.conf
 
 egrep 'HTACCESS_LOG|MODSEC_LOG|SSHD_LOG|FTPD_LOG|SMTPAUTH_LOG|IPTABLES_LOG|BIND_LOG|SYSLOG_LOG|WEBMIN_LOG' /etc/csf/csf.conf
 sed -i "s|HTACCESS_LOG = .*|HTACCESS_LOG = \"/var/log/virtualmin/\*_error_log\"|" /etc/csf/csf.conf

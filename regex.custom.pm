@@ -275,13 +275,22 @@ if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ 
 }
 
 #dovecot
-	if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot: pop3-login: Disconnected (\s*\(no auth attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )rip=(\S+),/)) {
-    $ip = $6;
-		$acc = $4;
-		$ip =~ s/^::ffff://;
-		$acc =~ s/^<|>$//g;
-		if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
-	}
+if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot: pop3-login: Disconnected (\s*\(no auth attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )rip=(\S+),/)) {
+  $ip = $6;
+	$acc = $4;
+	$ip =~ s/^::ffff://;
+	$acc =~ s/^<|>$//g;
+	if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
+}
+
+# Failed MySQL authentication
+# From /var/log/mysql/error.log:
+# 2022-04-01  1:39:27 xxxx [Warning] Aborted connection xxxx to db: 'unconnected' user: 'unauthenticated' host: 'xxx.xxx.xxx.xxx' (This connection closed normally without authentication)
+if (($globlogs{CUSTOM5_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+)\s+(\S+|\S+\s+\d+\s+\S+) \d+ \[Warning\] Aborted connection \d+ to db: 'unconnected' user: 'unauthenticated' host: '(\S+)' \(This connection closed normally without authentication\)/)) {
+  $ip = $3; $acc = "";
+  $ip =~ s/^::ffff://;
+	if (checkip(\$ip)) {return ("Failed MySQL authentication","$ip|$acc","mysql")} else {return}
+}
 
 # If the matches in this file are not syntactically correct for perl then lfd
 # will fail with an error. You are responsible for the security of any regex
