@@ -261,36 +261,49 @@ sub custom_line {
 # }
 
 # Spammer blocked from known spamlist
-if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 554 5.7.1 Service unavailable; Client host \[(\S+)\] blocked using (\S+)/)) {
-  $ip = $1; $acc = "";
-  $ip =~ s/^::ffff://;
-  if (&checkip($ip)) {return ("Email Spam: blocked using $4 ","$ip|$acc","Email Spam - Spoofing")} else {return}
-}
+  if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 554 5.7.1 Service unavailable; Client host \[(\S+)\] blocked using (\S+)/)) {
+    $ip = $1; $acc = "";
+    $ip =~ s/^::ffff://;
+    if (&checkip($ip)) {return ("Email Spam: blocked using $4 ","$ip|$acc","Email Spam - Spoofing")} else {return}
+  }
 
 # Helo command rejected: Host not found
-if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 450 4\.7\.1 (\S+): (Helo command rejected: Host not found)/)) {
-  $ip = $1; $acc = "";
-  $ip =~ s/^::ffff://;
-  if (&checkip($ip)) {return ("$3 ","$ip|$acc","Spoofing")} else {return}
-}
+  if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 450 4\.7\.1 (\S+): (Helo command rejected: Host not found)/)) {
+    $ip = $1; $acc = "";
+    $ip =~ s/^::ffff://;
+    if (&checkip($ip)) {return ("$3 ","$ip|$acc","Spoofing")} else {return}
+  }
 
 #dovecot
-if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot: pop3-login: Disconnected (\s*\(no auth attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )rip=(\S+),/)) {
-  $ip = $6;
-	$acc = $4;
-	$ip =~ s/^::ffff://;
-	$acc =~ s/^<|>$//g;
-	if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
-}
+  if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot: pop3-login: Disconnected (\s*\(no auth attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )rip=(\S+),/)) {
+    $ip = $6;
+  	$acc = $4;
+  	$ip =~ s/^::ffff://;
+  	$acc =~ s/^<|>$//g;
+  	if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
+  }
 
 # Failed MySQL authentication
-# From /var/log/mysql/error.log:
+# From CUSTOM5_LOG /var/log/mysql/error.log:
 # 2022-04-01  1:39:27 xxxx [Warning] Aborted connection xxxx to db: 'unconnected' user: 'unauthenticated' host: 'xxx.xxx.xxx.xxx' (This connection closed normally without authentication)
-if (($globlogs{CUSTOM5_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+)\s+(\S+|\S+\s+\d+\s+\S+) \d+ \[Warning\] Aborted connection \d+ to db: 'unconnected' user: 'unauthenticated' host: '(\S+)' \(This connection closed normally without authentication\)/)) {
-  $ip = $3; $acc = "";
-  $ip =~ s/^::ffff://;
-	if (checkip(\$ip)) {return ("Failed MySQL authentication","$ip|$acc","mysql")} else {return}
-}
+# Use settings from LF_SMTPAUTH
+  if (($config{LF_SMTPAUTH}) and ($globlogs{CUSTOM5_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+)\s+(\S+|\S+\s+\d+\s+\S+) \d+ \[Warning\] Aborted connection \d+ to db: 'unconnected' user: 'unauthenticated' host: '(\S+)' \(This connection closed normally without authentication\)/)) {
+    $ip = $3; $acc = "";
+    $ip =~ s/^::ffff://;
+  	if (checkip(\$ip)) {return ("Failed MySQL authentication","$ip|$acc","mysql")} else {return}
+  }
+
+# Failed MySQL authentication
+# From CUSTOM5_LOG /var/log/mysql/error.log:
+# 2022-03-29 21:25:30 18246 [Warning] Access denied for user 'root'@'xxx.xx.xx.xx' (using password: NO)
+# 2022-03-29 21:25:31 18247 [Warning] Access denied for user 'root'@'xxx.xx.xx.xx' (using password: YES)
+# Use settings from LF_SMTPAUTH
+  if (($config{LF_SMTPAUTH}) and ($globlogs{CUSTOM5_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+)\s+(\S+|\S+\s+\d+\s+\S+) \d+ \[Warning\] Access denied for user '(\S*)'@'(\S*)' \(using password: (YES|NO)\)/)) {
+    $ip = $4;
+    $acc = $3;
+    $ip =~ s/^::ffff://;
+  	if (checkip(\$ip)) {return ("Failed MySQL authentication","$ip|$acc","mysql")} else {return}
+  }
 
 # If the matches in this file are not syntactically correct for perl then lfd
 # will fail with an error. You are responsible for the security of any regex
