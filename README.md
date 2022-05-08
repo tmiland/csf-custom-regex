@@ -46,7 +46,8 @@ This will source the [Virtualmin install script](https://github.com/virtualmin/v
   * [sillsdev/ops-ansible-common-roles](https://github.com/sillsdev/ops-ansible-common-roles/blob/master/csf_config/files/regex.custom.pm)
   * [configserver](http://www.configserver.com)
 
-## Donations 
+## Donations
+<a href="https://www.buymeacoffee.com/tmiland" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 - [PayPal me](https://paypal.me/milanddata)
 - [BTC] : 33mjmoPxqfXnWNsvy8gvMZrrcG3gEa3YDM
 
