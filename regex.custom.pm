@@ -199,7 +199,7 @@ sub custom_line {
 
 # WordPress-wlwmanifest.xml
   if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /(\S+) -.*[GET|POST].*(wlwmanifest.xml)/)) {
-    return ("WordPress wlwmanifest.xml Attack",$1,"manifest","3","80,443","1");
+    return ("WordPress wlwmanifest.xml Attack",$1,"wordpress_wlwmanifest","3","80,443","1");
   }
 
 # shell.php
