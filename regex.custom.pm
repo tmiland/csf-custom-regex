@@ -262,7 +262,7 @@ sub custom_line {
 
 # Default: 3 errors bans permanant (Uses settings from SSHD_LOG)
 # sshd Timeout before authentication for connection
-  if (($config{SSHD_LOG}) and ($globlogs{SSHD_LOG}{$lgfile}) and ($line =~ /sshd\[\d+\]: Timeout before authentication for connection from (\S+)))/ {
+  if (($config{SSHD_LOG}) and ($globlogs{SSHD_LOG}{$lgfile}) and ($line =~ /sshd\[\d+\]: Timeout before authentication for connection from (\S+)))/)) {
     $ip = $1; $acc = "";
     $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("Timeout before authentication for connection from","$ip|$acc","sshd_timeout")} else {return}
@@ -270,7 +270,7 @@ sub custom_line {
 
 # Default: 3 errors bans permanant (Uses settings from SSHD_LOG)
 # sshd-session Invalid user
-  if (($config{SSHD_LOG}) and ($globlogs{SSHD_LOG}{$lgfile}) and ($line =~ /sshd-session\[\d+\]: Invalid user (\S+) from (\S+)/ {
+  if (($config{SSHD_LOG}) and ($globlogs{SSHD_LOG}{$lgfile}) and ($line =~ /sshd-session\[\d+\]: Invalid user (\S+) from (\S+)/)) {
     $ip = $1; $acc = "";
     $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("Invalid user","$ip|$acc","sshd_session_timeout")} else {return}
