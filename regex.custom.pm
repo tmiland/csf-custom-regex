@@ -260,6 +260,14 @@ sub custom_line {
 #     return ("Client host rejected: hostname not found",$1,"smtphostname","4","","86400","0");
 # }
 
+# Default: 3 errors bans permanant (Uses settings from SSHD_LOG)
+# sshd Timeout before authentication for connection
+  if (($config{SSHD_LOG}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /sshd\[\d+\]: Timeout before authentication for connection from (\S+)))/ {
+    $ip = $1; $acc = "";
+    $ip =~ s/^::ffff://;
+    if (&checkip($ip)) {return ("Timeout before authentication for connection from","$ip|$acc","sshd_timeout")} else {return}
+  }
+
 # Spammer blocked from known spamlist
   if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 554 5.7.1 Service unavailable; Client host \[(\S+)\] blocked using (\S+)/)) {
     $ip = $1; $acc = "";
