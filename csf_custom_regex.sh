@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
-## Author: Tommy Miland (@tmiland) - Copyright (c) 2021
+## Author: Tommy Miland (@tmiland) - Copyright (c) 2026
+
+VERSION='1.0.0'
+
 #------------------------------------------------------------------------------#
 #
 # MIT License
 #
-# Copyright (c) 2020 Tommy Miland
+# Copyright (c) 2026 Tommy Miland
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
