@@ -30,7 +30,7 @@ This will source the [Virtualmin install script](https://github.com/virtualmin/v
 
 ## Tested on:
 
-* Debian 10
+* Debian 10-13
 
 ## Compatibility and Requirements
 
