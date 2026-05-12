@@ -70,7 +70,7 @@ install_csf() {
 
 virtualmin_installer_url=https://github.com/virtualmin/virtualmin-install/raw/master/virtualmin-install.sh
 install_virtualmin() {
-  virtualmin_args=${*:-"--minimal --bundle LEMP"}
+  virtualmin_args=${*:-"--minimal --bundle LEMP --extra webmin-postgresql,postgresql,postgresql-client --include PostgreSQL"}
   shift
   if [[ $(command -v 'curl') ]]; then
     set -- $virtualmin_args
