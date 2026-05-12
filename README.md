@@ -13,9 +13,9 @@ Inspiration from: [enable CSF Firewall native fail2ban like support](https://com
 ## Installation
 
 ```bash
-$ wget https://github.com/tmiland/csf-custom-regex/raw/master/csf_custom_regex.sh
-$ chmod +x csf_custom_regex.sh
-$ ./csf_custom_regex.sh --install
+wget https://github.com/tmiland/csf-custom-regex/raw/master/csf_custom_regex.sh \
+chmod +x csf_custom_regex.sh \
+./csf_custom_regex.sh --install
 ```
 
 - Install option will download [regex.custom.pm](https://github.com/tmiland/csf-custom-regex/raw/master/regex.custom.pm)
