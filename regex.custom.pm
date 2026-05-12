@@ -268,6 +268,14 @@ sub custom_line {
     if (&checkip($ip)) {return ("Timeout before authentication for connection from","$ip|$acc","sshd_timeout")} else {return}
   }
 
+# Default: 3 errors bans permanant (Uses settings from SSHD_LOG)
+# sshd-session Invalid user
+  if (($config{SSHD_LOG}) and ($globlogs{SSHD_LOG}{$lgfile}) and ($line =~ /sshd-session\[\d+\]: Invalid user (\S+) from (\S+)/ {
+    $ip = $1; $acc = "";
+    $ip =~ s/^::ffff://;
+    if (&checkip($ip)) {return ("Invalid user","$ip|$acc","sshd_session_timeout")} else {return}
+  }
+
 # Spammer blocked from known spamlist
   if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 554 5.7.1 Service unavailable; Client host \[(\S+)\] blocked using (\S+)/)) {
     $ip = $1; $acc = "";
