@@ -17,10 +17,43 @@ jobs:
       - name: Run ShellCheck
         run: shellcheck csf_custom_regex.sh tests/smoke.sh
 
-  test:
-    name: Rules and installer tests
-    runs-on: ubuntu-latest
+  test-native:
+    name: Tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v4
+      - name: Perl syntax check (regex.custom.pm)
+        run: perl -c regex.custom.pm
+      - name: Custom regex rule tests
+        run: perl tests/test_regex.pl
+      - name: Installer smoke tests
+        run: bash tests/smoke.sh
+
+  test-container:
+    name: Tests (${{ matrix.image }})
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - debian:13
+          - debian:12
+          - rockylinux:9
+          - rockylinux:8
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - name: Install dependencies (Debian)
+        if: startsWith(matrix.image, 'debian')
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq git perl ca-certificates
+      - name: Install dependencies (RHEL family)
+        if: startsWith(matrix.image, 'rockylinux')
+        run: dnf install -y -q git perl
       - uses: actions/checkout@v4
       - name: Perl syntax check (regex.custom.pm)
         run: perl -c regex.custom.pm
