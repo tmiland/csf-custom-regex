@@ -299,6 +299,27 @@ sub custom_line {
   	if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
   }
 
+# /var/log/dovecot.log
+# Dovecot unknown user
+# 2023-06-07 22:40:53 auth: Info: passwd-file(abuse@somedomain.com,198.51.100.25): unknown user
+# (Default: 1 error bans permanently, only applies if LF_TRIGGER is disabled)
+  if (($globlogs{CUSTOM6_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ (?:dovecot: )?auth(?:-worker\(\d+\))?: Info: \S+\(([^,]*),\s*(\S+)\): unknown user/)) {
+    $ip = $3; $acc = $2;
+    $ip =~ s/^::ffff://;
+    if (&checkip($ip)) {return ("Dovecot unknown user from","$ip|$acc","dovecot_unknown_user","1","","1","0")} else {return}
+  }
+
+# /var/log/exim4/rejectlog
+# dovecot_login authenticator failed
+# 2023-06-07 22:41:04 dovecot_login authenticator failed for ([198.51.100.16]) [198.51.100.15]: 535 Incorrect authentication data (set_id=abuse@somedomain.com)
+# (Default: 1 error bans permanently, only applies if LF_TRIGGER is disabled)
+  if (($globlogs{CUSTOM7_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot_login authenticator failed for (?:\([^)]*\) )?\[(\S+)\]: 535 /)) {
+    $ip = $2; $acc = "";
+    $ip =~ s/^::ffff://;
+    if ($line =~ /\(set_id=(\S+)\)/) { $acc = $1; }
+    if (&checkip($ip)) {return ("Failed dovecot_login authentication from","$ip|$acc","exim_dovecot_login","1","","1","0")} else {return}
+  }
+
 # Failed MySQL authentication
 # From CUSTOM5_LOG /var/log/mysql/error.log:
 # 2022-04-01  1:39:27 xxxx [Warning] Aborted connection xxxx to db: 'unconnected' user: 'unauthenticated' host: 'xxx.xxx.xxx.xxx' (This connection closed normally without authentication)
