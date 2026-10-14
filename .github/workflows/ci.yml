@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ShellCheck
+        run: shellcheck csf_custom_regex.sh tests/smoke.sh
+
+  test:
+    name: Rules and installer tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Perl syntax check (regex.custom.pm)
+        run: perl -c regex.custom.pm
+      - name: Custom regex rule tests
+        run: perl tests/test_regex.pl
+      - name: Installer smoke tests
+        run: bash tests/smoke.sh
