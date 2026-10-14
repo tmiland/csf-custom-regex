@@ -23,7 +23,7 @@
 
 set -euo pipefail
 
-VERSION='1.0.2'
+VERSION='1.0.3'
 
 CSF_CONF='/etc/csf/csf.conf'
 CSF_BIN='/usr/sbin/csf'
