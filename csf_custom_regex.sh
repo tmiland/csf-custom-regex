@@ -135,13 +135,15 @@ install() {
   echo
 /usr/sbin/csf --profile backup backup-b4-customregex.$date
 cp -a /usr/local/csf/bin/regex.custom.pm /usr/local/csf/bin/regex.custom.pm.bak.$date
-egrep 'CUSTOM1_LOG|CUSTOM2_LOG|CUSTOM3_LOG|CUSTOM4_LOG|CUSTOM5_LOG' /etc/csf/csf.conf
+egrep 'CUSTOM1_LOG|CUSTOM2_LOG|CUSTOM3_LOG|CUSTOM4_LOG|CUSTOM5_LOG|CUSTOM6_LOG|CUSTOM7_LOG' /etc/csf/csf.conf
 sed -i "s|CUSTOM1_LOG = .*|CUSTOM1_LOG = \"/var/log/virtualmin/\*_access_log\"|" /etc/csf/csf.conf
 sed -i "s|CUSTOM2_LOG = .*|CUSTOM2_LOG = \"/var/log/virtualmin/\*_error_log\"|" /etc/csf/csf.conf
 sed -i "s|CUSTOM3_LOG = .*|CUSTOM3_LOG = \"/var/log/nginx/access.log\"|" /etc/csf/csf.conf
 sed -i "s|CUSTOM4_LOG = .*|CUSTOM4_LOG = \"/var/log/nginx/error.log\"|" /etc/csf/csf.conf
 sed -i "s|CUSTOM5_LOG = .*|CUSTOM5_LOG = \"/var/log/mysql/error.log\"|" /etc/csf/csf.conf
-egrep 'CUSTOM1_LOG|CUSTOM2_LOG|CUSTOM3_LOG|CUSTOM4_LOG|CUSTOM5_LOG' /etc/csf/csf.conf
+sed -i "s|CUSTOM6_LOG = .*|CUSTOM6_LOG = \"/var/log/dovecot.log\"|" /etc/csf/csf.conf
+sed -i "s|CUSTOM7_LOG = .*|CUSTOM7_LOG = \"/var/log/exim4/rejectlog\"|" /etc/csf/csf.conf
+egrep 'CUSTOM1_LOG|CUSTOM2_LOG|CUSTOM3_LOG|CUSTOM4_LOG|CUSTOM5_LOG|CUSTOM6_LOG|CUSTOM7_LOG' /etc/csf/csf.conf
 
 egrep 'HTACCESS_LOG|MODSEC_LOG|SSHD_LOG|FTPD_LOG|SMTPAUTH_LOG|IPTABLES_LOG|BIND_LOG|SYSLOG_LOG|WEBMIN_LOG' /etc/csf/csf.conf
 sed -i "s|HTACCESS_LOG = .*|HTACCESS_LOG = \"/var/log/virtualmin/\*_error_log\"|" /etc/csf/csf.conf
