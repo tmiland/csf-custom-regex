@@ -73,45 +73,45 @@ sub custom_line {
     return ("Nginx Security rule triggered from",$1,"nginx_404s","50","80,443","86400","0");
   }
 
-# /var/log/virtualmin/*_access_log
+# /var/log/virtualmin/*_error_log
 #Trying to download htaccess or htpasswd  (Default: 2 error bans for 24 hours)
-  if (($globlogs{CUSTOM1_LOG}{$lgfile}) and ($line =~ /.*\.(htpasswd|htaccess).*client: (\S+),.*GET/)) {
-    return ("Trying to download .ht files",$1,"nginx_htfiles","2","80,443","86400","0");
+  if (($globlogs{CUSTOM2_LOG}{$lgfile}) and ($line =~ /.*\.(htpasswd|htaccess).*client: (\S+),.*GET/)) {
+    return ("Trying to download .ht files",$2,"nginx_htfiles","2","80,443","86400","0");
   }
 
-# /var/log/nginx/access.log
+# /var/log/nginx/error.log
 #Trying to download htaccess or htpasswd  (Default: 2 error bans for 24 hours)
-  if (($globlogs{CUSTOM3_LOG}{$lgfile}) and ($line =~ /.*\.(htpasswd|htaccess).*client: (\S+),.*GET/)) {
-    return ("Trying to download .ht files",$1,"nginx_htfiles","2","80,443","86400","0");
+  if (($globlogs{CUSTOM4_LOG}{$lgfile}) and ($line =~ /.*\.(htpasswd|htaccess).*client: (\S+),.*GET/)) {
+    return ("Trying to download .ht files",$2,"nginx_htfiles","2","80,443","86400","0");
   }
 
 # Wordpress fail2ban plugin https://wordpress.org/plugins/wp-fail2ban-redux/
 # (Default: 2 errors bans for 24 hours)
-  if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*Authentication attempt for unknown user .* from (.*)\n/)) {
+  if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*Authentication attempt for unknown user .* from (.*)/)) {
     return ("Wordpress unknown user from",$1,"fail2ban_unknownuser","2","80,443","86400","0");
   }
 
 # Wordpress fail2ban plugin https://wordpress.org/plugins/wp-fail2ban-redux/
 # (Default: 2 errors bans for 24 hours)
-  if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*Blocked user enumeration attempt from (.*)\n/)) {
+  if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*Blocked user enumeration attempt from (.*)/)) {
     return ("WordPress user enumeration attempt from",$1,"fail2ban_userenum","2","80,443","86400","0");
   }
 
 # Wordpress fail2ban plugin https://wordpress.org/plugins/wp-fail2ban-redux/
 # (Default: 2 errors bans for 24 hours)
-  if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*Pingback error .* generated from (.*)\n/)) {
+  if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*Pingback error .* generated from (.*)/)) {
     return ("WordPress pingback error",$1,"fail2ban_pingback","2","80,443","86400","0");
   }
 
 # Wordpress fail2ban plugin https://wordpress.org/plugins/wp-fail2ban-redux/
 # (Default: 2 errors bans for 24 hours)
-  if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*Spammed comment from (.*)\n/)) {
+  if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*Spammed comment from (.*)/)) {
     return ("WordPress spam comments from",$1,"fail2ban_spam","2","80,443","86400","0");
   }
 
 # Wordpress fail2ban plugin https://wordpress.org/plugins/wp-fail2ban-redux/
 # (Default: 2 errors bans for 24 hours)
-  if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*XML-RPC multicall authentication failure (.*)\n/)) {
+  if (($globlogs{SYSLOG_LOG}{$lgfile}) and ($line =~ /.*XML-RPC multicall authentication failure (.*)/)) {
     return ("WordPress XML-RPC multicall fail from",$1,"fail2ban_xmlrpc","5","80,443","86400","0");
   }
 
@@ -269,29 +269,29 @@ sub custom_line {
   }
 
 # Default: 3 errors bans permanant (Uses settings from SSHD_LOG)
-# sshd-session Invalid user
-  if (($config{SSHD_LOG}) and ($globlogs{SSHD_LOG}{$lgfile}) and ($line =~ /sshd-session\[\d+\]: Invalid user (\S+) from (\S+)/)) {
-    $ip = $1; $acc = "";
+# sshd Invalid user (OpenSSH < 9.8) and sshd-session Invalid user (OpenSSH >= 9.8)
+  if (($config{SSHD_LOG}) and ($globlogs{SSHD_LOG}{$lgfile}) and ($line =~ /sshd(?:-session)?\[\d+\]: Invalid user (\S*) from (\S+)/)) {
+    $acc = $1; $ip = $2;
     $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("Invalid user","$ip|$acc","sshd_session_timeout")} else {return}
   }
 
 # Spammer blocked from known spamlist
-  if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 554 5.7.1 Service unavailable; Client host \[(\S+)\] blocked using (\S+)/)) {
-    $ip = $1; $acc = "";
+  if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 554 5.7.1 Service unavailable; Client host \[(\S+)\] blocked using (\S+)/)) {
+    $ip = $2; $acc = "";
     $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("Email Spam: blocked using $4 ","$ip|$acc","Email Spam - Spoofing")} else {return}
   }
 
 # Helo command rejected: Host not found
-  if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^\S+\s+\d+\s+\S+ \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 450 4\.7\.1 (\S+): (Helo command rejected: Host not found)/)) {
-    $ip = $1; $acc = "";
+  if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 450 4\.7\.1 (\S+): (Helo command rejected: Host not found)/)) {
+    $ip = $2; $acc = "";
     $ip =~ s/^::ffff://;
-    if (&checkip($ip)) {return ("$3 ","$ip|$acc","Spoofing")} else {return}
+    if (&checkip($ip)) {return ("$4 ","$ip|$acc","Spoofing")} else {return}
   }
 
-#dovecot
-  if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot: pop3-login: Disconnected (\s*\(no auth attempts( in \d+ secs)?\))?: (user=(<\S*>)?, )rip=(\S+),/)) {
+#dovecot (2.3 "Disconnected" and 2.4+ "Login aborted" formats)
+  if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot: pop3-login: (?:Disconnected|Login aborted: (?:Connection closed|Disconnected: Too many bad commands)) (\s*\(no auth attempts( in \d+ secs)?\))?(?: \(no_auth_attempts\))?: (user=(<\S*>)?, )rip=(\S+),/)) {
     $ip = $6;
   	$acc = $4;
   	$ip =~ s/^::ffff://;
