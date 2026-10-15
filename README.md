@@ -65,6 +65,8 @@ You will see lines like: ```Mar 15 00:05:46 vps lfd[688]: (nginx_444) Nginx 444 
 
 Log paths are chosen by probing existing files, so Debian-family and RHEL-family layouts are both handled.
 
+> **Note on `CUSTOM6_LOG` (dovecot unknown user):** this rule can only match with a file-based passdb (e.g. `passwd-file`). With `passdb = pam` (common on Virtualmin/ISPConfig setups), PAM reports unknown users as a plain password mismatch, so dovecot never logs `unknown user` and the rule stays silent. Check with: `doveconf -n | grep -A1 'passdb {'`.
+
 ## Tested on:
 
 * Debian 10-13 (maintainer tested)

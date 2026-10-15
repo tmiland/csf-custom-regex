@@ -302,6 +302,8 @@ sub custom_line {
 # /var/log/dovecot.log
 # Dovecot unknown user
 # 2023-06-07 22:40:53 auth: Info: passwd-file(abuse@somedomain.com,198.51.100.25): unknown user
+# NOTE: only fires with a file-based passdb (passwd-file etc). With passdb = pam, PAM
+# reports unknown users as a plain password mismatch and dovecot never logs "unknown user".
 # (Default: 1 error bans permanently, only applies if LF_TRIGGER is disabled)
   if (($globlogs{CUSTOM6_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ (?:dovecot: )?auth(?:-worker\(\d+\))?: Info: \S+\(([^,]*),\s*(\S+)\): unknown user/)) {
     $ip = $3; $acc = $2;
