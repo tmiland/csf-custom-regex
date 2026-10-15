@@ -221,9 +221,9 @@ sub custom_line {
     if (&checkip($ip)) {return ("UNKNOWN from unknown from","$ip|$acc","postfix_unknown")} else {return}
   }
 
-# postfix/smtpd lost connection after AUTH
+# postfix/smtpd lost connection after AUTH, or dropped mid-CONNECT/STARTTLS/RCPT
 # Default: 5 errors bans permanant (Uses settings from LF_SMTPAUTH)
-  if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /postfix\/smtpd\[\d+\]: lost connection after AUTH from [^\[]+\[(\d+\.\d+\.\d+\.\d+)\]/)) {
+  if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /postfix\/smtpd\[\d+\]: (?:NOQUEUE: )?lost connection after (?:AUTH|CONNECT|STARTTLS|RCPT) from [^\[]+\[(\d+\.\d+\.\d+\.\d+)\]/)) {
     $ip = $1; $acc = "";
     $ip =~ s/^::ffff://;
     if (&checkip($ip)) {return ("lost connection after AUTH from","$ip|$acc","postfix_lost")} else {return}
@@ -276,6 +276,19 @@ sub custom_line {
     if (&checkip($ip)) {return ("Invalid user","$ip|$acc","sshd_session_timeout")} else {return}
   }
 
+# sshd pre-auth aborts: connect, poke at auth and vanish without a login
+# attempt (OpenSSH < 9.8 "sshd" and >= 9.8 "sshd-session" prefixes). Covers
+# "Connection closed/reset by [authenticating|invalid user] <ip>", the bare
+# "Connection closed by <ip>" form (which never carries [preauth]) and
+# "Received disconnect ... Bye Bye [preauth]" / "Disconnected from ... [preauth]".
+# Default: 5 errors bans for 24 hours (threshold-based: legitimate clients on
+# flaky links can abort isolated connections, so this sits well above that)
+  if (($config{SSHD_LOG}) and ($globlogs{SSHD_LOG}{$lgfile}) and ($line =~ /sshd(?:-session)?\[\d+\]: (?:error: )?(?:Connection (?:closed|reset) by (?:(?:authenticating|invalid) user\s+(?:\S+\s+)?|)(\S+) port \d+(?: \[preauth\])?|Received disconnect from (\S+) port \d+:\d+: Bye Bye \[preauth\]|Disconnected from (?:(?:authenticating|invalid) user\s+(?:\S+\s+)?|user\s+(?:\S+\s+)?|)(\S+) port \d+ \[preauth\])/)) {
+    $ip = $1 || $2 || $3; $acc = "";
+    $ip =~ s/^::ffff://;
+    if (&checkip($ip)) {return ("SSH pre-auth abort from","$ip|$acc","sshd_preauth","5","","86400","0")} else {return}
+  }
+
 # Spammer blocked from known spamlist
   if (($config{LF_SMTPAUTH}) and ($globlogs{SMTPAUTH_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ postfix\/smtpd\[\d+\]: NOQUEUE: reject: RCPT from \S+\[(\S+)\]: 554 5.7.1 Service unavailable; Client host \[(\S+)\] blocked using (\S+)/)) {
     $ip = $2; $acc = "";
@@ -290,13 +303,25 @@ sub custom_line {
     if (&checkip($ip)) {return ("$4 ","$ip|$acc","Spoofing")} else {return}
   }
 
-#dovecot (2.3 "Disconnected" and 2.4+ "Login aborted" formats)
-  if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot: pop3-login: (?:Disconnected|Login aborted: (?:Connection closed|Disconnected: Too many bad commands)) (\s*\(no auth attempts( in \d+ secs)?\))?(?: \(no_auth_attempts\))?: (user=(<\S*>)?, )rip=(\S+),/)) {
+#dovecot (2.3 "Disconnected" and 2.4+ "Login aborted" formats; the middle
+# part covers Connection closed / Logged out / Too many bad|invalid commands)
+  if (($config{LF_POP3D}) and ($globlogs{POP3D_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot: pop3-login: (?:(?:Disconnected|Login aborted): (?:Connection closed|Too many (?:bad|invalid) commands|Disconnected: Too many (?:bad|invalid) commands)|Login aborted: Logged out|Disconnected) (\s*\(no auth attempts( in \d+ secs)?\))?(?: \(no_auth_attempts\))?: (user=(<\S*>)?, )rip=(\S+),/)) {
     $ip = $6;
   	$acc = $4;
   	$ip =~ s/^::ffff://;
   	$acc =~ s/^<|>$//g;
   	if (checkip(\$ip)) {return ("Failed POP3 login from","$ip|$acc","pop3d")} else {return}
+  }
+
+#dovecot imap-login (2.3 "Disconnected" and 2.4+ "Login aborted" formats).
+# The "(no auth attempts ...)" parenthetical is mandatory here, so post-auth
+# "Logged out: user=<someone>" lines (which carry method= before rip=) can
+# never match, and TLS handshake aborts never carry the parenthetical.
+# Default: 5 errors bans for 24 hours
+  if (($config{LF_IMAPD}) and ($globlogs{IMAPD_LOG}{$lgfile}) and ($line =~ /^(\S+|\S+\s+\d+\s+\S+) \S+ dovecot: imap-login: (?:(?:Disconnected|Login aborted): (?:Connection closed|Too many (?:invalid|bad) commands|Disconnected: Too many (?:invalid|bad) commands)|Login aborted: Logged out|Disconnected) (\s*\(no auth attempts( in \d+ secs)?\))(?: \(no_auth_attempts\))?: (user=(<\S*>)?, )rip=(\S+),/)) {
+    $ip = $6; $acc = "";
+    $ip =~ s/^::ffff://;
+    if (checkip(\$ip)) {return ("Failed IMAP login from","$ip|$acc","imapd","5","","86400","0")} else {return}
   }
 
 # /var/log/dovecot.log

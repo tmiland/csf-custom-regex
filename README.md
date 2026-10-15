@@ -61,9 +61,11 @@ You will see lines like: ```Mar 15 00:05:46 vps lfd[688]: (nginx_444) Nginx 444 
 | `CUSTOM5_LOG` | MariaDB/MySQL detected | mysql login failures |
 | `CUSTOM6_LOG` | Dovecot detected | dovecot login failures |
 | `CUSTOM7_LOG` | Exim detected | exim/dovecot rejectlog rules |
-| `SSHD_LOG`, `SYSLOG_LOG`, `SMTPAUTH_LOG`, `POP3D_LOG`, `FTPD_LOG`, `WEBMIN_LOG`, `HTACCESS_LOG`, `MODSEC_LOG` | matching service/log detected | existing sshd, syslog, mail auth, ftp, webmin and htaccess/modsec rules |
+| `SSHD_LOG`, `SYSLOG_LOG`, `SMTPAUTH_LOG`, `POP3D_LOG`, `IMAPD_LOG`, `FTPD_LOG`, `WEBMIN_LOG`, `HTACCESS_LOG`, `MODSEC_LOG` | matching service/log detected | existing sshd, syslog, mail auth, ftp, webmin and htaccess/modsec rules, plus the sshd pre-auth abort rule, the dovecot imap/pop3 no-auth-abort rules and the postfix lost-connection (CONNECT/STARTTLS/RCPT) rule |
 
 Log paths are chosen by probing existing files, so Debian-family and RHEL-family layouts are both handled.
+
+> **Note on the abort rules:** `sshd_preauth` and `imapd` are threshold-based (5 events/hour → 24 h temp ban) because legitimate clients on flaky links can abort isolated connections; TLS handshake failures never match, and IPs in `csf.allow` are never banned by them. `pop3d` and `postfix_lost` keep their log's `LF_*` settings.
 
 > **Note on `CUSTOM6_LOG` (dovecot unknown user):** this rule can only match with a file-based passdb (e.g. `passwd-file`). With `passdb = pam` (common on Virtualmin/ISPConfig setups), PAM reports unknown users as a plain password mismatch, so dovecot never logs `unknown user` and the rule stays silent. Check with: `doveconf -n | grep -A1 'passdb {'`.
 
