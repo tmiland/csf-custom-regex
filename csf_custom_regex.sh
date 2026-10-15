@@ -211,7 +211,7 @@ detect_services() {
 setting_names=(
   CUSTOM1_LOG CUSTOM2_LOG CUSTOM3_LOG CUSTOM4_LOG CUSTOM5_LOG CUSTOM6_LOG
   CUSTOM7_LOG SSHD_LOG WEBMIN_LOG SYSLOG_LOG BIND_LOG IPTABLES_LOG
-  SMTPAUTH_LOG POP3D_LOG FTPD_LOG HTACCESS_LOG MODSEC_LOG
+  SMTPAUTH_LOG POP3D_LOG IMAPD_LOG FTPD_LOG HTACCESS_LOG MODSEC_LOG
 )
 declare -A setting_value=()
 declare -A setting_note=()
@@ -344,8 +344,10 @@ build_plan() {
 
   if p=$(pick_existing /var/log/mail.log /var/log/maillog /var/log/dovecot.log); then
     setting_value[POP3D_LOG]="$p"
+    setting_value[IMAPD_LOG]="$p"
   else
     plan_skip POP3D_LOG 'no mail log found'
+    plan_skip IMAPD_LOG 'no mail log found'
   fi
 
   # -- ftp -------------------------------------------------------------------
