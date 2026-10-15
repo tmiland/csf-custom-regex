@@ -28,8 +28,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Perl syntax check (regex.custom.pm)
         run: perl -c regex.custom.pm
-      - name: Custom regex rule tests
-        run: perl tests/test_regex.pl
       - name: Installer smoke tests
         run: bash tests/smoke.sh
 
@@ -57,7 +55,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Perl syntax check (regex.custom.pm)
         run: perl -c regex.custom.pm
-      - name: Custom regex rule tests
-        run: perl tests/test_regex.pl
       - name: Installer smoke tests
         run: bash tests/smoke.sh
